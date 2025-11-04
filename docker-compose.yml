@@ -1,0 +1,138 @@
+version: "3.7"
+
+services:
+  ## --------------------------- SHOPIFY APP --------------------------- ##
+  
+  shopify_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ecomdrop-ia-connector:latest
+    container_name: shopify_app
+    
+    networks:
+      - EcomdropNet
+    
+    environment:
+      ## 🗄️ Base de Datos (MySQL)
+      - DATABASE_URL=mysql://shopify_user:${MYSQL_PASSWORD}@mysql:3306/shopify_app?schema=public
+      
+      ## 🔐 Shopify API
+      - SHOPIFY_API_KEY=${SHOPIFY_API_KEY}
+      - SHOPIFY_API_SECRET=${SHOPIFY_API_SECRET}
+      - SCOPES=read_products,write_products,read_orders,read_themes,write_themes
+      - SHOPIFY_APP_URL=${SHOPIFY_APP_URL}
+      
+      ## 🌐 Configuración de Entorno
+      - NODE_ENV=production
+      - PORT=3000
+      
+      ## 🎨 Theme 2.5 (Opcional)
+      - THEME_2_5_URL=${THEME_2_5_URL:-}
+      - THEME_2_5_GIT_REPO=${THEME_2_5_GIT_REPO:-Mercaline2024/Thema-ecomdro2.5}
+      - THEME_2_5_GIT_BRANCH=${THEME_2_5_GIT_BRANCH:-main}
+      - THEME_2_5_GIT_PROVIDER=${THEME_2_5_GIT_PROVIDER:-github}
+      - THEME_2_5_GIT_TOKEN=${THEME_2_5_GIT_TOKEN:-}
+      
+      ## 🏪 Dominio Personalizado (Opcional)
+      - SHOP_CUSTOM_DOMAIN=${SHOP_CUSTOM_DOMAIN:-}
+      
+      ## 🕒 Fuso Horario
+      - TZ=America/Bogota
+    
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.shopify_app.rule=Host(`${APP_DOMAIN}`)
+        - traefik.http.routers.shopify_app.entrypoints=websecure
+        - traefik.http.routers.shopify_app.priority=1
+        - traefik.http.routers.shopify_app.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.shopify_app.service=shopify_app
+        - traefik.http.services.shopify_app.loadbalancer.server.port=3000
+        - traefik.http.services.shopify_app.loadbalancer.passHostHeader=1
+        - traefik.http.routers.shopify_app.middlewares=shopify_app-headers
+        - traefik.http.middlewares.shopify_app-headers.headers.customrequestheaders.X-Forwarded-Proto=https
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+    
+    volumes:
+      - ./prisma:/app/prisma:ro
+
+  ## --------------------------- MYSQL --------------------------- ##
+  
+  mysql:
+    image: mysql:8.0
+    container_name: shopify_mysql
+    networks:
+      - EcomdropNet
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=shopify_app
+      - MYSQL_USER=shopify_user
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - TZ=America/Bogota
+    command: 
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+      - --max_allowed_packet=256M
+      - --innodb_buffer_pool_size=512M
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1024M
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+## --------------------------- REDES --------------------------- ##
+
+networks:
+  EcomdropNet:
+    external: true
+    name: EcomdropNet
+
+## --------------------------- VOLÚMENES --------------------------- ##
+
+volumes:
+  mysql_data:
+    driver: local
+
