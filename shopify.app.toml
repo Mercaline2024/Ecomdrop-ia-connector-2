@@ -1,0 +1,37 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "3ac9cc1ea7ce564db26a01257b570cb8"
+name = "Ecomdrop  IA Connector"
+application_url = "https://shopify.ecomdrop.io"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+include_config_on_deploy = true
+
+[webhooks]
+api_version = "2025-10"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/scopes_update" ]
+  uri = "/webhooks/app/scopes_update"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+# Permisos necesarios:
+# - read_products: Para leer productos y variantes de Shopify
+# - write_products: Para actualizar productos, agregar imágenes y sincronizar con Dropi
+# - read_orders: Para leer órdenes y procesarlas con Ecomdrop
+# - read_themes: Para leer temas existentes y mostrar preview
+# - write_themes: Para instalar y crear nuevos temas (Theme 2.5)
+# NOTA: write_orders fue removido porque no se está usando actualmente
+scopes = "read_products,write_products,read_orders,read_themes,write_themes"
+optional_scopes = [ ]
+use_legacy_install_flow = false
+
+[auth]
+redirect_urls = [ ]

@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+}
+
+model ShopConfiguration {
+  id                      String   @id @default(uuid())
+  shop                    String   @unique
+  ecomdropApiKey          String?
+  nuevoPedidoFlowId       String?
+  carritoAbandonadoFlowId String?
+  dropiStoreName          String?
+  dropiCountry            String?
+  dropiToken              String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+model ProductAssociation {
+  id                    String   @id @default(uuid())
+  shop                  String
+  dropiProductId        String   // ID del producto en Dropi
+  shopifyProductId      String   // ID del producto en Shopify (GraphQL ID)
+  dropiProductName      String?  // Nombre del producto Dropi
+  shopifyProductTitle   String?  // Título del producto Shopify
+  importType            String   // "new" | "link" (importar nuevo o vincular existente)
+  dropiVariations       String?  // JSON array de variaciones seleccionadas
+  saveDropiName         Boolean  @default(true)
+  saveDropiDescription  Boolean  @default(true)
+  customPrice           String?  // Precio personalizado si se estableció
+  useSuggestedBarcode   Boolean  @default(false)
+  saveDropiImages       Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([shop, dropiProductId, shopifyProductId])
+  @@index([shop])
+  @@index([dropiProductId])
+  @@index([shopifyProductId])
+}
+
+model AIConfiguration {
+  id                      String   @id @default(uuid())
+  shop                    String   @unique
+  agentName               String?  // Nombre del agente IA
+  companyName             String?  // Nombre de la empresa
+  companyDescription      String?  // Descripción de la empresa
+  paymentMethods          String?  // JSON array de métodos de pago
+  companyPolicies         String?  // Políticas de la empresa
+  faq                     String?  // JSON array de preguntas frecuentes
+  postSaleFaq             String?  // JSON array de preguntas frecuentes post venta
+  rules                   String?  // JSON array de reglas
+  notifications           String?  // JSON array de notificaciones
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@index([shop])
+}
