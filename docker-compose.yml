@@ -72,9 +72,6 @@ services:
 
     depends_on:
       - mysql
-    
-    volumes:
-      - ./prisma:/app/prisma:ro
 
   ## --------------------------- MYSQL --------------------------- ##
   
