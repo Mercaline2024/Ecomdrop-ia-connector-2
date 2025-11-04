@@ -4,9 +4,11 @@ services:
   ## --------------------------- SHOPIFY APP --------------------------- ##
   
   shopify_app:
-    # Para Docker Swarm, la imagen debe ser construida antes del deploy
-    # Portainer construirá la imagen automáticamente cuando uses Git repository
-    image: shopify-app_shopify_app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Portainer construirá automáticamente desde Git cuando detecte 'build:'
+    # El nombre de imagen será generado por Portainer
     
     networks:
       - EcomdropNet
