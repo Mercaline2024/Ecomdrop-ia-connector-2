@@ -15,7 +15,7 @@ services:
     
     environment:
       ## 🗄️ Base de Datos (MySQL)
-      - DATABASE_URL=mysql://shopify_user:${MYSQL_PASSWORD}@mysql:3306/shopify_app?schema=public
+      - DATABASE_URL=mysql://shopify_user:${MYSQL_PASSWORD}@mysql:3306/shopify_app
       
       ## 🔐 Shopify API
       - SHOPIFY_API_KEY=${SHOPIFY_API_KEY}
