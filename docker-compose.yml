@@ -7,8 +7,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # Portainer construirá automáticamente desde Git cuando detecte 'build:'
-    # El nombre de imagen será generado automáticamente: [stack-name]_[service-name]:latest
+    image: shopify-app_shopify_app:latest
+    # IMPORTANTE: Portainer debe construir la imagen antes de desplegar
+    # El nombre debe ser: [stack-name]_[service-name]:latest
     
     networks:
       - EcomdropNet
