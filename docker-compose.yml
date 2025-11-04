@@ -7,8 +7,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: shopify-app_shopify_app:latest
     # Portainer construirá automáticamente desde Git cuando detecte 'build:'
-    # El nombre de imagen será: [stack-name]_[service-name]:latest
+    # El nombre de imagen debe coincidir con el formato: [stack-name]_[service-name]:latest
     
     networks:
       - EcomdropNet
@@ -27,15 +28,15 @@ services:
       - NODE_ENV=production
       - PORT=3000
       
-      ## 🎨 Theme 2.5 (Opcional)
-      - THEME_2_5_URL=${THEME_2_5_URL}
-      - THEME_2_5_GIT_REPO=${THEME_2_5_GIT_REPO}
-      - THEME_2_5_GIT_BRANCH=${THEME_2_5_GIT_BRANCH}
-      - THEME_2_5_GIT_PROVIDER=${THEME_2_5_GIT_PROVIDER}
-      - THEME_2_5_GIT_TOKEN=${THEME_2_5_GIT_TOKEN}
+      ## 🎨 Theme 2.5 (Opcional - solo si están definidas)
+      - THEME_2_5_URL=${THEME_2_5_URL:-}
+      - THEME_2_5_GIT_REPO=${THEME_2_5_GIT_REPO:-Mercaline2024/Thema-ecomdro2.5}
+      - THEME_2_5_GIT_BRANCH=${THEME_2_5_GIT_BRANCH:-main}
+      - THEME_2_5_GIT_PROVIDER=${THEME_2_5_GIT_PROVIDER:-github}
+      - THEME_2_5_GIT_TOKEN=${THEME_2_5_GIT_TOKEN:-}
       
       ## 🏪 Dominio Personalizado (Opcional)
-      - SHOP_CUSTOM_DOMAIN=${SHOP_CUSTOM_DOMAIN}
+      - SHOP_CUSTOM_DOMAIN=${SHOP_CUSTOM_DOMAIN:-}
       
       ## 🕒 Fuso Horario
       - TZ=America/Bogota
