@@ -1,110 +1,7 @@
 version: "3.8"
 
 services:
-  ## --------------------------- SHOPIFY APP --------------------------- ##
-  
-  shopify_app:
-    image: shopify-app_shopify_app:latest
-    # NOTA: Debes construir la imagen primero en Portainer:
-    # 1. Ve a Images > Build a new image
-    # 2. Usa el Dockerfile del repositorio
-    # 3. Nombra la imagen: shopify-app_shopify_app:latest
-    
-    networks:
-      - EcomdropNet
-    
-    environment:
-      ## 🗄️ Base de Datos
-      DATABASE_URL: mysql://shopify_user:${MYSQL_PASSWORD}@mysql:3306/shopify_app
-      
-      ## 🔐 Shopify API (REQUERIDO)
-      SHOPIFY_API_KEY: ${SHOPIFY_API_KEY}
-      SHOPIFY_API_SECRET: ${SHOPIFY_API_SECRET}
-      SCOPES: read_products,write_products,read_orders,read_themes,write_themes
-      SHOPIFY_APP_URL: https://shopify.ecomdrop.io
-      
-      ## 🌐 Configuración de Entorno
-      NODE_ENV: production
-      PORT: 3000
-      
-      ## 🎨 Theme 2.5 - GitHub Private Repo (OPCIONAL)
-      THEME_2_5_GIT_REPO: ${THEME_2_5_GIT_REPO:-}
-      THEME_2_5_GIT_BRANCH: ${THEME_2_5_GIT_BRANCH:-main}
-      THEME_2_5_GIT_PROVIDER: ${THEME_2_5_GIT_PROVIDER:-github}
-      THEME_2_5_GIT_TOKEN: ${THEME_2_5_GIT_TOKEN:-}
-      
-      ## 🏪 Dominio Personalizado (OPCIONAL)
-      SHOP_CUSTOM_DOMAIN: ${SHOP_CUSTOM_DOMAIN:-}
-      
-      ## 🕒 Zona Horaria
-      TZ: America/Bogota
-    
-    deploy:
-      mode: replicated
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      
-      resources:
-        limits:
-          cpus: "1.5"
-          memory: 1536M
-        reservations:
-          cpus: "0.5"
-          memory: 768M
-      
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 5
-        window: 180s
-      
-      labels:
-        ## Traefik - Router Principal
-        - traefik.enable=true
-        - traefik.http.routers.shopify_app.rule=Host(`shopify.ecomdrop.io`)
-        - traefik.http.routers.shopify_app.entrypoints=websecure
-        - traefik.http.routers.shopify_app.tls.certresolver=letsencryptresolver
-        - traefik.http.routers.shopify_app.service=shopify_app
-        
-        ## Traefik - Service Configuration
-        - traefik.http.services.shopify_app.loadbalancer.server.port=3000
-        - traefik.http.services.shopify_app.loadbalancer.passhostheader=true
-        - traefik.http.services.shopify_app.loadbalancer.healthcheck.path=/health
-        - traefik.http.services.shopify_app.loadbalancer.healthcheck.interval=30s
-        - traefik.http.services.shopify_app.loadbalancer.healthcheck.timeout=10s
-        
-        ## Traefik - Security Headers
-        - traefik.http.routers.shopify_app.middlewares=shopify_app-headers,shopify_app-compress
-        - traefik.http.middlewares.shopify_app-headers.headers.customrequestheaders.X-Forwarded-Proto=https
-        - traefik.http.middlewares.shopify_app-headers.headers.customrequestheaders.X-Forwarded-Host=shopify.ecomdrop.io
-        - traefik.http.middlewares.shopify_app-headers.headers.sslredirect=true
-        - traefik.http.middlewares.shopify_app-headers.headers.stsSeconds=31536000
-        - traefik.http.middlewares.shopify_app-headers.headers.framedeny=false
-        - traefik.http.middlewares.shopify_app-headers.headers.contenttypenosniff=true
-        - traefik.http.middlewares.shopify_app-headers.headers.browserxssfilter=true
-        
-        ## Traefik - Compression
-        - traefik.http.middlewares.shopify_app-compress.compress=true
-        
-        ## Portainer Labels
-        - com.ecomdrop.app=shopify-connector
-        - com.ecomdrop.version=1.0.0
-        - com.ecomdrop.description=Shopify App - Ecomdrop IA Connector
-    
-    depends_on:
-      mysql:
-        condition: service_healthy
-    
-    healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').catch(()=>process.exit(1))"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  ## --------------------------- MYSQL 8.0 --------------------------- ##
+  ## --------------------------- MYSQL 8.0 (PRIMERO) --------------------------- ##
   
   mysql:
     image: mysql:8.0
@@ -125,21 +22,17 @@ services:
       - --default-authentication-plugin=mysql_native_password
       - --max_allowed_packet=256M
       - --innodb_buffer_pool_size=768M
-      - --innodb_log_file_size=256M
       - --max_connections=200
-      - --wait_timeout=28800
-      - --interactive_timeout=28800
     
     volumes:
       - mysql_data:/var/lib/mysql
-      - mysql_logs:/var/log/mysql
     
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     
     deploy:
       mode: replicated
@@ -161,10 +54,78 @@ services:
         delay: 10s
         max_attempts: 3
         window: 120s
+
+  ## --------------------------- SHOPIFY APP --------------------------- ##
+  
+  shopify_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: shopify-app_shopify_app:latest
+    # Portainer construirá la imagen desde Git cuando vea 'build:'
+    
+    networks:
+      - EcomdropNet
+    
+    environment:
+      ## 🗄️ Base de Datos
+      DATABASE_URL: mysql://shopify_user:${MYSQL_PASSWORD}@mysql:3306/shopify_app
+      
+      ## 🔐 Shopify API
+      SHOPIFY_API_KEY: ${SHOPIFY_API_KEY}
+      SHOPIFY_API_SECRET: ${SHOPIFY_API_SECRET}
+      SCOPES: read_products,write_products,read_orders,read_themes,write_themes
+      SHOPIFY_APP_URL: https://shopify.ecomdrop.io
+      
+      ## 🌐 Configuración
+      NODE_ENV: production
+      PORT: 3000
+      TZ: America/Bogota
+      
+      ## 🎨 Theme 2.5 (Opcional)
+      THEME_2_5_GIT_REPO: ${THEME_2_5_GIT_REPO}
+      THEME_2_5_GIT_BRANCH: ${THEME_2_5_GIT_BRANCH}
+      THEME_2_5_GIT_PROVIDER: ${THEME_2_5_GIT_PROVIDER}
+      THEME_2_5_GIT_TOKEN: ${THEME_2_5_GIT_TOKEN}
+      
+      ## 🏪 Dominio (Opcional)
+      SHOP_CUSTOM_DOMAIN: ${SHOP_CUSTOM_DOMAIN}
+    
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 1536M
+        reservations:
+          cpus: "0.5"
+          memory: 768M
+      
+      restart_policy:
+        condition: on-failure
+        delay: 15s
+        max_attempts: 5
+        window: 180s
       
       labels:
-        - com.ecomdrop.service=mysql
-        - com.ecomdrop.backup=true
+        - traefik.enable=true
+        - traefik.http.routers.shopify_app.rule=Host(`shopify.ecomdrop.io`)
+        - traefik.http.routers.shopify_app.entrypoints=websecure
+        - traefik.http.routers.shopify_app.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.shopify_app.service=shopify_app
+        - traefik.http.services.shopify_app.loadbalancer.server.port=3000
+        - traefik.http.services.shopify_app.loadbalancer.passhostheader=true
+        - traefik.http.routers.shopify_app.middlewares=shopify_app-headers
+        - traefik.http.middlewares.shopify_app-headers.headers.customrequestheaders.X-Forwarded-Proto=https
+        - traefik.http.middlewares.shopify_app-headers.headers.sslredirect=true
+    
+    depends_on:
+      - mysql
 
 ## --------------------------- REDES --------------------------- ##
 
@@ -177,11 +138,4 @@ networks:
 
 volumes:
   mysql_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /mnt/data/shopify-app/mysql
-  
-  mysql_logs:
     driver: local
