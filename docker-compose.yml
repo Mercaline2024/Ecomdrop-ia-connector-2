@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile
     # Portainer construirá automáticamente desde Git cuando detecte 'build:'
-    # El nombre de imagen será generado por Portainer
+    # El nombre de imagen será: [stack-name]_[service-name]:latest
     
     networks:
       - EcomdropNet
@@ -60,7 +60,7 @@ services:
         window: 120s
       labels:
         - traefik.enable=true
-        - traefik.http.routers.shopify_app.rule=Host(`${APP_DOMAIN}`)
+        - traefik.http.routers.shopify_app.rule=Host(`shopify.ecomdrop.io`)
         - traefik.http.routers.shopify_app.entrypoints=websecure
         - traefik.http.routers.shopify_app.priority=1
         - traefik.http.routers.shopify_app.tls.certresolver=letsencryptresolver
@@ -94,7 +94,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 10s
       timeout: 5s
       retries: 5
