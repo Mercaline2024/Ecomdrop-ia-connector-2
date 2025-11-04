@@ -71,8 +71,7 @@ services:
         - traefik.http.middlewares.shopify_app-headers.headers.customrequestheaders.X-Forwarded-Proto=https
 
     depends_on:
-      mysql:
-        condition: service_healthy
+      - mysql
     
     volumes:
       - ./prisma:/app/prisma:ro
