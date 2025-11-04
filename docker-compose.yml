@@ -4,11 +4,9 @@ services:
   ## --------------------------- SHOPIFY APP --------------------------- ##
   
   shopify_app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # No especificar image para que Portainer construya automáticamente desde Git
-    container_name: shopify_app
+    # Para Docker Swarm, la imagen debe ser construida antes del deploy
+    # Portainer construirá la imagen automáticamente cuando uses Git repository
+    image: shopify-app_shopify_app:latest
     
     networks:
       - EcomdropNet
@@ -77,7 +75,6 @@ services:
   
   mysql:
     image: mysql:8.0
-    container_name: shopify_mysql
     networks:
       - EcomdropNet
     environment:
