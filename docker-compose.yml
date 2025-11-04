@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ecomdrop-ia-connector:latest
+    # No especificar image para que Portainer construya automáticamente desde Git
     container_name: shopify_app
     
     networks:
