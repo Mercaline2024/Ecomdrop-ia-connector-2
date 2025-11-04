@@ -28,14 +28,14 @@ services:
       - PORT=3000
       
       ## 🎨 Theme 2.5 (Opcional)
-      - THEME_2_5_URL=${THEME_2_5_URL:-}
-      - THEME_2_5_GIT_REPO=${THEME_2_5_GIT_REPO:-Mercaline2024/Thema-ecomdro2.5}
-      - THEME_2_5_GIT_BRANCH=${THEME_2_5_GIT_BRANCH:-main}
-      - THEME_2_5_GIT_PROVIDER=${THEME_2_5_GIT_PROVIDER:-github}
-      - THEME_2_5_GIT_TOKEN=${THEME_2_5_GIT_TOKEN:-}
+      - THEME_2_5_URL=${THEME_2_5_URL}
+      - THEME_2_5_GIT_REPO=${THEME_2_5_GIT_REPO}
+      - THEME_2_5_GIT_BRANCH=${THEME_2_5_GIT_BRANCH}
+      - THEME_2_5_GIT_PROVIDER=${THEME_2_5_GIT_PROVIDER}
+      - THEME_2_5_GIT_TOKEN=${THEME_2_5_GIT_TOKEN}
       
       ## 🏪 Dominio Personalizado (Opcional)
-      - SHOP_CUSTOM_DOMAIN=${SHOP_CUSTOM_DOMAIN:-}
+      - SHOP_CUSTOM_DOMAIN=${SHOP_CUSTOM_DOMAIN}
       
       ## 🕒 Fuso Horario
       - TZ=America/Bogota
@@ -94,7 +94,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$$MYSQL_ROOT_PASSWORD\" || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
