@@ -4,6 +4,7 @@ client_id = "f6edf6b48987a8adc8008aa6bb32b723"
 name = "ecomdrop-connector2.0"
 application_url = "https://example.com/"
 embedded = true
+handle = "ecomdrop-connector2-0"
 
 [build]
 automatically_update_urls_on_dev = true
@@ -13,25 +14,32 @@ include_config_on_deploy = true
 api_version = "2025-10"
 
   [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
-  [[webhooks.subscriptions]]
   topics = [ "app/scopes_update" ]
   uri = "/webhooks/app/scopes_update"
 
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
+
+  # Webhooks GraphQL (API moderna) - Comentados temporalmente para desarrollo
+  # Requieren aprobación de Shopify para datos protegidos de clientes
+  # Descomentar cuando la app esté lista para producción y tenga aprobación
+  # ORDERS_CREATE: Nuevo pedido completado (GraphQL)
+  # [[webhooks.subscriptions]]
+  # topics = [ "ORDERS_CREATE" ]
+  # uri = "/webhooks/orders/create"
+
+  # DRAFT_ORDERS_CREATE: Pedido preliminar o carrito abandonado (GraphQL)
+  # Este es el webhook moderno para carritos abandonados según GraphQL API
+  # [[webhooks.subscriptions]]
+  # topics = [ "DRAFT_ORDERS_CREATE" ]
+  # uri = "/webhooks/draft_orders/create"
+
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-# Permisos necesarios:
-# - read_products: Para leer productos y variantes de Shopify
-# - write_products: Para actualizar productos, agregar imágenes y sincronizar con Dropi
-# - read_orders: Para leer órdenes y procesarlas con Ecomdrop
-# - read_themes: Para leer temas existentes y mostrar preview
-# - write_themes: Para instalar y crear nuevos temas (Theme 2.5)
-# NOTA: write_orders fue removido porque no se está usando actualmente
-scopes = "read_products,write_products,read_orders,read_themes,write_themes"
+scopes = "read_assigned_fulfillment_orders,write_assigned_fulfillment_orders,read_customer_events,read_customers,write_customers,write_draft_orders,read_draft_orders,read_files,write_files,read_merchant_managed_fulfillment_orders,write_merchant_managed_fulfillment_orders,write_order_edits,read_order_edits,read_orders,write_orders,write_products,read_third_party_fulfillment_orders,write_third_party_fulfillment_orders,customer_write_customers,customer_read_customers,customer_read_draft_orders,customer_read_markets,customer_read_orders,customer_write_orders,unauthenticated_read_customer_tags"
 optional_scopes = [ ]
-use_legacy_install_flow = true
+use_legacy_install_flow = false
 
 [auth]
-redirect_urls = [ ]
+redirect_urls = [ "https://example.com/api/auth" ]

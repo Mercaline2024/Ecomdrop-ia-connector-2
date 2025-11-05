@@ -96,26 +96,49 @@ export function clearFlowsCache(apiKey?: string) {
 
 /**
  * Trigger a specific flow by ID
- * This will be used later to execute flows when events occur in Shopify
+ * Envía los datos del evento (pedido o carrito) al endpoint de Ecomdrop
  */
 export async function triggerEcomdropFlow(
   apiKey: string,
   flowId: string,
   payload: any
 ): Promise<EcomdropApiResponse> {
-  // TODO: Implement flow triggering logic
-  // This will be called when events like "Nuevo pedido" or "Carrito Abandonado" occur
-  
   try {
-    // Placeholder for future implementation
-    console.log(`Triggering flow ${flowId} with payload:`, payload);
-    
+    console.log(`🔍 Triggering Ecomdrop flow ${flowId}...`);
+    console.log(`📦 Payload:`, JSON.stringify(payload, null, 2));
+
+    // Endpoint para disparar un flow en Ecomdrop
+    // Ajusta esta URL según la documentación de la API de Ecomdrop
+    const response = await fetch(`${ECOMDROP_API_BASE}/flows/${flowId}/trigger`, {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "X-ACCESS-TOKEN": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    console.log(`📊 Response status: ${response.status}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ API Error:", response.status, errorText);
+      return {
+        success: false,
+        error: `API Error: ${response.status} - ${errorText}`,
+      };
+    }
+
+    const data = await response.json();
+    console.log("✅ Flow triggered successfully:", data);
+
     return {
       success: true,
-      data: undefined,
+      data: data,
     };
   } catch (error) {
-    console.error("Error triggering Ecomdrop flow:", error);
+    console.error("❌ Error triggering Ecomdrop flow:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown error occurred",
