@@ -1,41 +1,49 @@
-FROM node:20-alpine
-RUN apk add --no-cache openssl
+# Multi-stage build para optimizar tamaño de imagen
+FROM node:20-alpine AS base
+RUN apk add --no-cache openssl libc6-compat
 
-EXPOSE 3000
+# Stage 1: Dependencies
+FROM base AS deps
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci --only=production && npm cache clean --force
 
+# Stage 2: Build
+FROM base AS builder
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Stage 3: Production
+FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PORT=3000
 
+# Instalar herramientas necesarias
+RUN apk add --no-cache netcat-openbsd curl
+
+# Copiar dependencias de producción
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copiar archivos de build
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/public ./public
+
+# Copiar archivos necesarios para Prisma
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma
 
-RUN npm ci --omit=dev && npm cache clean --force
+# Copiar script de entrypoint
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
-COPY . .
+EXPOSE 3000
 
-RUN npm run build
-
-# Instalar netcat para verificar MySQL
-RUN apk add --no-cache netcat-openbsd
-
-# Crear script de inicio que espera a MySQL
-RUN echo '#!/bin/sh' > /app/docker-entrypoint.sh && \
-    echo 'set -e' >> /app/docker-entrypoint.sh && \
-    echo 'echo "=== Starting application ==="' >> /app/docker-entrypoint.sh && \
-    echo 'echo "Waiting for MySQL to be ready..."' >> /app/docker-entrypoint.sh && \
-    echo 'counter=0' >> /app/docker-entrypoint.sh && \
-    echo 'until nc -z mysql 3306; do' >> /app/docker-entrypoint.sh && \
-    echo '  counter=$((counter+1))' >> /app/docker-entrypoint.sh && \
-    echo '  echo "MySQL is unavailable - sleeping (attempt $counter)..."' >> /app/docker-entrypoint.sh && \
-    echo '  sleep 2' >> /app/docker-entrypoint.sh && \
-    echo '  if [ $counter -gt 30 ]; then' >> /app/docker-entrypoint.sh && \
-    echo '    echo "MySQL did not become available after 60 seconds"' >> /app/docker-entrypoint.sh && \
-    echo '    exit 1' >> /app/docker-entrypoint.sh && \
-    echo '  fi' >> /app/docker-entrypoint.sh && \
-    echo 'done' >> /app/docker-entrypoint.sh && \
-    echo 'echo "MySQL is up - executing application..."' >> /app/docker-entrypoint.sh && \
-    echo 'echo "Running: npm run docker-start"' >> /app/docker-entrypoint.sh && \
-    echo 'exec npm run docker-start' >> /app/docker-entrypoint.sh && \
-    chmod +x /app/docker-entrypoint.sh
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
 
 CMD ["/app/docker-entrypoint.sh"]
