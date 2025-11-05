@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "3ac9cc1ea7ce564db26a01257b570cb8"
+client_id = "f6edf6b48987a8adc8008aa6bb32b723"
 name = "Ecomdrop  IA Connector"
 application_url = "https://shopify.ecomdrop.io"
 embedded = true
