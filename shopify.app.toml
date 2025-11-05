@@ -31,7 +31,7 @@ api_version = "2025-10"
 # NOTA: write_orders fue removido porque no se está usando actualmente
 scopes = "read_products,write_products,read_orders,read_themes,write_themes"
 optional_scopes = [ ]
-use_legacy_install_flow = false
+use_legacy_install_flow = true
 
 [auth]
 redirect_urls = [ ]
