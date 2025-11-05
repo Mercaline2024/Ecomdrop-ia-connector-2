@@ -11,7 +11,7 @@ automatically_update_urls_on_dev = true
 include_config_on_deploy = true
 
 [webhooks]
-api_version = "2025-10"
+api_version = "2025-07"
 
   [[webhooks.subscriptions]]
   topics = [ "app/scopes_update" ]
@@ -20,20 +20,6 @@ api_version = "2025-10"
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
   uri = "/webhooks/app/uninstalled"
-
-  # Webhooks GraphQL (API moderna) - Comentados temporalmente para desarrollo
-  # Requieren aprobación de Shopify para datos protegidos de clientes
-  # Descomentar cuando la app esté lista para producción y tenga aprobación
-  # ORDERS_CREATE: Nuevo pedido completado (GraphQL)
-  # [[webhooks.subscriptions]]
-  # topics = [ "ORDERS_CREATE" ]
-  # uri = "/webhooks/orders/create"
-
-  # DRAFT_ORDERS_CREATE: Pedido preliminar o carrito abandonado (GraphQL)
-  # Este es el webhook moderno para carritos abandonados según GraphQL API
-  # [[webhooks.subscriptions]]
-  # topics = [ "DRAFT_ORDERS_CREATE" ]
-  # uri = "/webhooks/draft_orders/create"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes

@@ -17,9 +17,9 @@ model Session {
   shop          String
   state         String
   isOnline      Boolean   @default(false)
-  scope         String?
+  scope         String?   @db.Text
   expires       DateTime?
-  accessToken   String
+  accessToken   String    @db.Text
   userId        BigInt?
   firstName     String?
   lastName      String?
@@ -33,12 +33,12 @@ model Session {
 model ShopConfiguration {
   id                      String   @id @default(uuid())
   shop                    String   @unique
-  ecomdropApiKey          String?
+  ecomdropApiKey          String?   @db.Text
   nuevoPedidoFlowId       String?
   carritoAbandonadoFlowId String?
   dropiStoreName          String?
   dropiCountry            String?
-  dropiToken              String?
+  dropiToken              String?   @db.Text
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 }
