@@ -6,6 +6,30 @@ import { authenticate } from "../shopify.server";
 import db from "../db.server";
 import { LoadingModal } from "../components/modals/LoadingModal";
 import { SuccessModal } from "../components/modals/SuccessModal";
+import { Button as ShadcnButton } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Separator } from "../components/ui/separator";
+import { 
+  Search, 
+  X, 
+  Package, 
+  Link2, 
+  Eye, 
+  CheckCircle2, 
+  AlertCircle, 
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  ShoppingBag,
+  Warehouse,
+  DollarSign,
+  Filter,
+  RefreshCw,
+  Trash2,
+  Settings
+} from "lucide-react";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session, admin } = await authenticate.admin(request);
@@ -353,726 +377,465 @@ export default function ProductsPage() {
 
   return (
     <>
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-      <s-page heading="Productos">
-        {/* Tabs Navigation */}
-        <div style={{ 
-        borderBottom: '2px solid #e1e3e5', 
-        marginBottom: '2rem',
-        display: 'flex',
-        gap: '0'
-      }}>
-        <button
-          type="button"
-          onClick={() => setActiveTab("productos")}
-          style={{
-            padding: '1rem 2rem',
-            border: 'none',
-            background: activeTab === "productos" ? '#5c6ac4' : 'transparent',
-            color: activeTab === "productos" ? '#fff' : '#666',
-            fontWeight: activeTab === "productos" ? 'bold' : 'normal',
-            borderBottom: activeTab === "productos" ? '3px solid #5c6ac4' : '3px solid transparent',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            borderRadius: '8px 8px 0 0'
-          }}
-        >
-          Productos
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("sincronizada")}
-          style={{
-            padding: '1rem 2rem',
-            border: 'none',
-            background: activeTab === "sincronizada" ? '#5c6ac4' : 'transparent',
-            color: activeTab === "sincronizada" ? '#fff' : '#666',
-            fontWeight: activeTab === "sincronizada" ? 'bold' : 'normal',
-            borderBottom: activeTab === "sincronizada" ? '3px solid #5c6ac4' : '3px solid transparent',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            borderRadius: '8px 8px 0 0'
-          }}
-        >
-          Información sincronizada
-        </button>
-        </div>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Productos</h1>
+            <p className="text-gray-600">Gestiona y sincroniza tus productos de Dropi con Shopify</p>
+          </div>
+
+          {/* Tabs Navigation Moderna */}
+          <div className="border-b border-gray-200 mb-6">
+            <nav className="flex space-x-8" aria-label="Tabs">
+              <button
+                type="button"
+                onClick={() => setActiveTab("productos")}
+                className={`
+                  flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                  ${activeTab === "productos"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }
+                `}
+              >
+                <Package className="h-4 w-4" />
+                Productos
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("sincronizada")}
+                className={`
+                  flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                  ${activeTab === "sincronizada"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }
+                `}
+              >
+                <Link2 className="h-4 w-4" />
+                Sincronizados
+                {associations.length > 0 && (
+                  <Badge variant="secondary" className="ml-1">
+                    {associations.length}
+                  </Badge>
+                )}
+              </button>
+            </nav>
+          </div>
 
         {activeTab === "productos" && (
           <>
-            <s-section heading="Asociación de Productos Dropi ↔ Shopify">
-        <s-paragraph>
-                Conecte productos de Dropi con productos de Shopify para sincronización automática y personalización con campos del bot de Ecomdrop.
-              </s-paragraph>
-
-              {!configuration?.dropiToken && (
-                <s-box
-                  padding="base"
-                  borderWidth="base"
-                  borderRadius="base"
-                  background="warning-subdued"
-                >
-                  <s-paragraph>
-                    ⚠️ Primero debe configurar Dropi en la pestaña "Configuración"
-        </s-paragraph>
-                </s-box>
-              )}
-      </s-section>
+            {!configuration?.dropiToken && (
+              <Card className="mb-6 border-amber-200 bg-amber-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-amber-900">
+                    <AlertCircle className="h-5 w-5" />
+                    Configuración Requerida
+                  </CardTitle>
+                  <CardDescription className="text-amber-800">
+                    Primero debe configurar Dropi en la pestaña "Configuración" para poder gestionar productos.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            )}
 
             {configuration?.dropiToken && (
               <>
-                <div style={{ width: '100%', maxWidth: '100%' }}>
-            <s-section heading="Productos de Dropi">
-              <div style={{ marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                <div style={{ flex: '1', minWidth: '200px' }}>
-                  <label htmlFor="search_dropi" style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>
-                    Buscar Producto
-                  </label>
-                  <input
-                    id="search_dropi"
-                    type="text"
-                    value={searchKeywords}
-                    onChange={(e) => {
-                      const value = e.currentTarget.value;
-                      setSearchKeywords(value);
-                      // Si se borra la búsqueda, volver a cargar favoritos por defecto
-                      if (!value) {
-                        setCurrentPage(1);
-                        loadDropiProducts("", 1);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        setCurrentPage(1);
-                        loadDropiProducts(searchKeywords, 1);
-                      }
-                    }}
-                    placeholder="Ingrese ID producto o nombre del producto"
-                    style={{ 
-                      width: '100%', 
-                      padding: '8px', 
-                      borderRadius: '4px', 
-                      border: '1px solid #ccc',
-                      marginTop: '4px'
-                    }}
-                  />
-                </div>
-          <s-button
-                  variant="primary"
-              onClick={() => {
-                    setCurrentPage(1);
-                    loadDropiProducts(searchKeywords, 1);
-              }}
-                  {...(dropiProductsFetcher.state === "loading" ? { loading: true } : {})}
-            >
-                  🔍 Buscar
-          </s-button>
-            {searchKeywords && (
-            <s-button
-                variant="secondary"
-              onClick={() => {
-                  setSearchKeywords("");
-                  setCurrentPage(1);
-                  loadDropiProducts("", 1);
-                }}
-              >
-                ✕ Limpiar
-            </s-button>
-          )}
-              </div>
-              
-              {/* Filtros - Solo mostrar cuando NO hay búsqueda activa */}
-              {!searchKeywords && (
-                <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '1rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', userSelect: 'none' }}>
-                    <input
-                      type="checkbox"
-                      checked={privatedProduct}
-                      onChange={(e) => {
-                        setPrivatedProduct(e.target.checked);
-                        setCurrentPage(1);
-                        loadDropiProducts("", 1);
-                      }}
-                      style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                    />
-                    <span style={{ fontSize: '14px', fontWeight: '500', color: '#333' }}>
-                      🔒 Productos Privados
-                    </span>
-                  </label>
-                  <s-text tone="subdued" style={{ fontSize: '12px', color: '#666' }}>
-                    {privatedProduct 
-                      ? '(Mostrando solo productos privados)' 
-                      : '(Mostrando solo productos favoritos por defecto)'}
-                  </s-text>
-                </div>
-              )}
-              
-              {dropiProducts.length > 0 && (
-                <s-text tone="subdued" style={{ marginTop: '0.5rem', display: 'block' }}>
-                  {totalProducts > 0 ? `${totalProducts} producto(s) total(es)` : `${dropiProducts.length} producto(s)`} {searchKeywords ? 'encontrado(s)' : 'cargado(s)'}
-                </s-text>
-              )}
-            </div>
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ShoppingBag className="h-5 w-5" />
+                      Buscar Productos de Dropi
+                    </CardTitle>
+                    <CardDescription>
+                      Conecte productos de Dropi con productos de Shopify para sincronización automática
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                      <div className="flex-1 relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="search_dropi"
+                          type="text"
+                          value={searchKeywords}
+                          onChange={(e) => {
+                            const value = e.currentTarget.value;
+                            setSearchKeywords(value);
+                            if (!value) {
+                              setCurrentPage(1);
+                              loadDropiProducts("", 1);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              setCurrentPage(1);
+                              loadDropiProducts(searchKeywords, 1);
+                            }
+                          }}
+                          placeholder="Ingrese ID producto o nombre del producto"
+                          className="pl-10"
+                        />
+                      </div>
+                      <ShadcnButton
+                        onClick={() => {
+                          setCurrentPage(1);
+                          loadDropiProducts(searchKeywords, 1);
+                        }}
+                        disabled={dropiProductsFetcher.state === "loading"}
+                      >
+                        {dropiProductsFetcher.state === "loading" ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Buscando...
+                          </>
+                        ) : (
+                          <>
+                            <Search className="h-4 w-4 mr-2" />
+                            Buscar
+                          </>
+                        )}
+                      </ShadcnButton>
+                      {searchKeywords && (
+                        <ShadcnButton
+                          variant="outline"
+                          onClick={() => {
+                            setSearchKeywords("");
+                            setCurrentPage(1);
+                            loadDropiProducts("", 1);
+                          }}
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          Limpiar
+                        </ShadcnButton>
+                      )}
+                    </div>
+                    
+                    {/* Filtros */}
+                    {!searchKeywords && (
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={privatedProduct}
+                            onChange={(e) => {
+                              setPrivatedProduct(e.target.checked);
+                              setCurrentPage(1);
+                              loadDropiProducts("", 1);
+                            }}
+                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                          <span className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                            <Filter className="h-4 w-4" />
+                            Productos Privados
+                          </span>
+                        </label>
+                        <Badge variant="outline" className="text-xs">
+                          {privatedProduct 
+                            ? 'Mostrando productos privados' 
+                            : 'Mostrando productos favoritos'}
+                        </Badge>
+                      </div>
+                    )}
+                    
+                    {dropiProducts.length > 0 && (
+                      <div className="mt-4">
+                        <Badge variant="secondary" className="text-xs">
+                          {totalProducts > 0 ? `${totalProducts} producto(s) total(es)` : `${dropiProducts.length} producto(s)`} {searchKeywords ? 'encontrado(s)' : 'cargado(s)'}
+                        </Badge>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
             {dropiProducts.length === 0 ? (
-              <s-box
-                padding="base"
-                borderWidth="base"
-                borderRadius="base"
-                background="info-subdued"
-              >
-                <s-paragraph>
-                  Haga clic en "Cargar Productos de Dropi" para ver sus productos en favoritos
-                </s-paragraph>
-              </s-box>
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Package className="h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No hay productos disponibles
+                  </h3>
+                  <p className="text-sm text-gray-500 text-center max-w-md">
+                    {dropiProductsFetcher.state === "loading" 
+                      ? "Cargando productos..." 
+                      : "Busca productos de Dropi o ajusta los filtros para ver tus productos"}
+                  </p>
+                </CardContent>
+              </Card>
             ) : (
-              <div style={{ 
-                background: '#fff', 
-                borderRadius: '8px', 
-                overflow: 'hidden',
-                border: '1px solid #e1e3e5',
-                width: '100%',
-                overflowX: 'auto',
-                position: 'relative'
-              }}>
-                {/* Overlay de carga */}
-                {dropiProductsFetcher.state === "loading" && dropiProducts.length > 0 && (
-                  <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'rgba(255, 255, 255, 0.9)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 10,
-                    borderRadius: '8px',
-                    gap: '1rem'
-                  }}>
-                    <div style={{
-                      width: '48px',
-                      height: '48px',
-                      border: '4px solid #e1e3e5',
-                      borderTop: '4px solid #5c6ac4',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite'
-                    }}></div>
-                    <div style={{
-                      color: '#5c6ac4',
-                      fontSize: '16px',
-                      fontWeight: '600'
-                    }}>
-                      Cargando productos...
+              <Card>
+                <CardContent className="p-0">
+                  {/* Overlay de carga */}
+                  {dropiProductsFetcher.state === "loading" && dropiProducts.length > 0 && (
+                    <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-lg gap-4">
+                      <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                      <p className="text-primary font-semibold">Cargando productos...</p>
                     </div>
+                  )}
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse min-w-[800px]">
+                      <thead>
+                        <tr className="bg-gray-50 border-b-2 border-gray-200">
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 text-sm">
+                            ID/SKU
+                          </th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 text-sm">
+                            NOMBRE
+                          </th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 text-sm">
+                            PRECIO
+                          </th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 text-sm">
+                            STOCK
+                          </th>
+                          <th className="px-4 py-3 text-left font-semibold text-gray-700 text-sm">
+                            BODEGA
+                          </th>
+                          <th className="px-4 py-3 text-center font-semibold text-gray-700 text-sm">
+                            ACCIONES
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dropiProducts.map((product: any, index: number) => (
+                          <tr 
+                            key={product.id}
+                            className={`
+                              border-b border-gray-100 transition-colors cursor-pointer
+                              ${selectedDropiProduct === product.id 
+                                ? 'bg-blue-50 hover:bg-blue-100' 
+                                : index % 2 === 0 
+                                ? 'bg-white hover:bg-gray-50' 
+                                : 'bg-gray-50/50 hover:bg-gray-100'
+                              }
+                            `}
+                            onClick={() => setSelectedDropiProduct(product.id)}
+                          >
+                            <td className="px-4 py-4 align-middle">
+                              <div className="flex items-center gap-3">
+                                {product.gallery && product.gallery.length > 0 ? (
+                                  <img 
+                                    src={`https://d39ru7awumhhs2.cloudfront.net/${product.gallery[0].urlS3}`} 
+                                    alt={product.name}
+                                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
+                                  />
+                                ) : (
+                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-600 font-semibold">
+                                    {product.name?.charAt(0)?.toUpperCase() || '?'}
+                                  </div>
+                                )}
+                                <div>
+                                  <div className="font-semibold text-gray-900 text-sm">
+                                    {product.id}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-0.5">
+                                    {product.sku || 'N/A'}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-4 align-middle">
+                              <div className="font-medium text-gray-900 text-sm">
+                                {product.name || product.title}
+                              </div>
+                              {product.categories && product.categories.length > 0 && (
+                                <div className="text-xs text-gray-500 mt-1 flex items-center gap-1 flex-wrap">
+                                  {product.categories.slice(0, 2).map((cat: any, idx: number) => (
+                                    <Badge key={idx} variant="outline" className="text-xs">
+                                      {cat.name}
+                                    </Badge>
+                                  ))}
+                                  {product.categories.length > 2 && (
+                                    <span className="text-gray-400">+{product.categories.length - 2}</span>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-4 py-4 align-middle">
+                              <div className="flex flex-col gap-1.5">
+                                <Badge className="bg-green-100 text-green-800 hover:bg-green-100 w-fit">
+                                  <DollarSign className="h-3 w-3 mr-1" />
+                                  ${parseFloat(product.sale_price || 0).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </Badge>
+                                {product.suggested_price && (
+                                  <Badge variant="outline" className="w-fit text-xs">
+                                    Sugerido: ${parseFloat(product.suggested_price).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                  </Badge>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4 align-middle">
+                              <Badge 
+                                variant={product.private_product_inventories && product.private_product_inventories.length > 0 ? "default" : "secondary"}
+                                className="w-fit"
+                              >
+                                {product.private_product_inventories && product.private_product_inventories.length > 0 
+                                  ? product.private_product_inventories.reduce((sum: number, inv: any) => sum + parseFloat(inv.stock || 0), 0).toLocaleString('es-CO')
+                                  : product.warehouse_product && product.warehouse_product.length > 0
+                                  ? product.warehouse_product.reduce((sum: number, wp: any) => sum + (wp.stock || 0), 0).toLocaleString('es-CO')
+                                  : '0'}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-4 align-middle">
+                              {product.warehouse_product && product.warehouse_product.length > 0 ? (
+                                <div className="flex items-center gap-1 text-sm text-gray-700">
+                                  <Warehouse className="h-4 w-4 text-gray-400" />
+                                  <span className="font-medium">
+                                    {product.warehouse_product.map((wp: any) => wp.warehouse?.name || 'N/A').join(', ')}
+                                  </span>
+                                </div>
+                              ) : product.private_product_inventories && product.private_product_inventories.length > 0 ? (
+                                <div className="text-sm text-gray-600">
+                                  {product.private_product_inventories.map((inv: any) => inv.user?.name || 'N/A').join(', ')}
+                                </div>
+                              ) : (
+                                <span className="text-sm text-gray-400">N/A</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-4 align-middle text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <ShadcnButton
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openImportModal(product);
+                                  }}
+                                  className="h-8 w-8"
+                                  title="Asociar producto"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </ShadcnButton>
+                                <input
+                                  type="checkbox"
+                                  checked={selectedDropiProduct === product.id}
+                                  onChange={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedDropiProduct(e.target.checked ? product.id : "");
+                                  }}
+                                  className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                                />
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                )}
-                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
-                  <thead>
-                    <tr style={{ background: '#f5f5f5', borderBottom: '2px solid #e1e3e5' }}>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                        ID/SKU
-                      </th>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                        NOMBRE
-                      </th>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                        PRECIO
-                      </th>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                        STOCK
-                      </th>
-                      <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                        BODEGA
-                      </th>
-                      <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                        ACCIONES
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dropiProducts.map((product: any, index: number) => (
-                      <tr 
-                        key={product.id}
-                        style={{ 
-                          borderBottom: '1px solid #e1e3e5',
-                          background: selectedDropiProduct === product.id ? '#f0f9ff' : index % 2 === 0 ? '#fff' : '#fafafa',
-                          cursor: 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (selectedDropiProduct !== product.id) {
-                            e.currentTarget.style.background = '#f8f9fa';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (selectedDropiProduct !== product.id) {
-                            e.currentTarget.style.background = index % 2 === 0 ? '#fff' : '#fafafa';
-                          }
-                        }}
-                        onClick={() => setSelectedDropiProduct(product.id)}
-                      >
-                        <td style={{ padding: '16px', verticalAlign: 'middle' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            {product.gallery && product.gallery.length > 0 ? (
-                              <img 
-                                src={`https://d39ru7awumhhs2.cloudfront.net/${product.gallery[0].urlS3}`} 
-                                alt={product.name}
-                                style={{ 
-                                  width: '50px', 
-                                  height: '50px', 
-                                  borderRadius: '50%', 
-                                  objectFit: 'cover',
-                                  border: '2px solid #e1e3e5'
-                                }}
-                              />
-                            ) : (
-                              <div style={{
-                                width: '50px',
-                                height: '50px',
-                                borderRadius: '50%',
-                                background: '#e1e3e5',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: '#666',
-                                fontSize: '12px'
-                              }}>
-                                {product.name?.charAt(0) || '?'}
-                              </div>
-                            )}
-                            <div>
-                              <div style={{ fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                                {product.id}
-                              </div>
-                              <div style={{ color: '#666', fontSize: '12px', marginTop: '2px' }}>
-                                {product.sku || 'N/A'}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td style={{ padding: '16px', verticalAlign: 'middle' }}>
-                          <div style={{ fontWeight: '500', color: '#333', fontSize: '14px' }}>
-                            {product.name || product.title}
-                          </div>
-                          {product.categories && product.categories.length > 0 && (
-                            <div style={{ color: '#666', fontSize: '12px', marginTop: '4px' }}>
-                              {product.categories.map((cat: any) => cat.name).join(', ')}
-                            </div>
-                          )}
-                        </td>
-                        <td style={{ padding: '16px', verticalAlign: 'middle' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <div style={{
-                              padding: '6px 12px',
-                              background: '#d4edda',
-                              color: '#155724',
-                              borderRadius: '4px',
-                              fontWeight: '600',
-                              fontSize: '14px',
-                              display: 'inline-block',
-                              width: 'fit-content'
-                            }}>
-                              ${parseFloat(product.sale_price || 0).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                            </div>
-                            {product.suggested_price && (
-                              <div style={{
-                                padding: '4px 12px',
-                                background: '#fff3cd',
-                                color: '#856404',
-                                borderRadius: '4px',
-                                fontWeight: '500',
-                                fontSize: '12px',
-                                display: 'inline-block',
-                                width: 'fit-content'
-                              }}>
-                                ${parseFloat(product.suggested_price).toLocaleString('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td style={{ padding: '16px', verticalAlign: 'middle' }}>
-                          <div style={{ 
-                            fontWeight: '600', 
-                            color: '#333', 
-                            fontSize: '14px',
-                            padding: '6px 12px',
-                            background: product.private_product_inventories && product.private_product_inventories.length > 0 ? '#d1ecf1' : '#f8d7da',
-                            borderRadius: '4px',
-                            display: 'inline-block'
-                          }}>
-                            {product.private_product_inventories && product.private_product_inventories.length > 0 
-                              ? product.private_product_inventories.reduce((sum: number, inv: any) => sum + parseFloat(inv.stock || 0), 0).toLocaleString('es-CO')
-                              : product.warehouse_product && product.warehouse_product.length > 0
-                              ? product.warehouse_product.reduce((sum: number, wp: any) => sum + (wp.stock || 0), 0).toLocaleString('es-CO')
-                              : '0'}
-                          </div>
-                        </td>
-                        <td style={{ padding: '16px', verticalAlign: 'middle' }}>
-                          {product.warehouse_product && product.warehouse_product.length > 0 ? (
-                            <div style={{ color: '#333', fontSize: '14px', fontWeight: '500' }}>
-                              {product.warehouse_product.map((wp: any) => wp.warehouse?.name || 'N/A').join(', ')}
-                            </div>
-                          ) : product.private_product_inventories && product.private_product_inventories.length > 0 ? (
-                            <div style={{ color: '#666', fontSize: '14px' }}>
-                              {product.private_product_inventories.map((inv: any) => inv.user?.name || 'N/A').join(', ')}
-                            </div>
-                          ) : (
-                            <div style={{ color: '#999', fontSize: '14px' }}>N/A</div>
-                          )}
-                        </td>
-                        <td style={{ padding: '16px', verticalAlign: 'middle', textAlign: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                            <button
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: '8px',
-                                borderRadius: '50%',
-                                color: '#5c6ac4',
-                                fontSize: '18px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'background-color 0.2s'
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#f0f0f0';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'transparent';
-                              }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openImportModal(product);
-                              }}
-                              title="Importar producto"
-                            >
-                              👁️
-                            </button>
-                            <input
-                              type="checkbox"
-                              checked={selectedDropiProduct === product.id}
-                              onChange={(e) => {
-                                e.stopPropagation();
-                                setSelectedDropiProduct(e.target.checked ? product.id : "");
-                              }}
-                              style={{
-                                width: '18px',
-                                height: '18px',
-                                cursor: 'pointer'
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* Controles de Paginación */}
             {dropiProducts.length > 0 && (
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center', 
-                gap: '1rem',
-                marginTop: '2rem',
-                padding: '1rem',
-                background: '#f5f5f5',
-                borderRadius: '8px'
-              }}>
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1 || dropiProductsFetcher.state === "loading"}
-                  style={{
-                    padding: '8px 16px',
-                    background: currentPage === 1 ? '#e1e3e5' : '#5c6ac4',
-                    color: currentPage === 1 ? '#666' : '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (currentPage > 1) {
-                      e.currentTarget.style.background = '#4c5b9e';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (currentPage > 1) {
-                      e.currentTarget.style.background = '#5c6ac4';
-                    }
-                  }}
-                >
-                  ← Anterior
-                </button>
-                
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.5rem',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#333'
-                }}>
-                  {dropiProductsFetcher.state === "loading" ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <div style={{
-                        width: '16px',
-                        height: '16px',
-                        border: '2px solid #e1e3e5',
-                        borderTop: '2px solid #5c6ac4',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></div>
-                      <span>Cargando...</span>
-                    </div>
-                  ) : (
-                    <>
-                      <span>Página</span>
-                      <span style={{
-                        padding: '6px 12px',
-                        background: '#fff',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        minWidth: '40px',
-                        textAlign: 'center'
-                      }}>
-                        {currentPage}
-                      </span>
-                      <span>de</span>
-                      <span style={{
-                        padding: '6px 12px',
-                        background: '#fff',
-                        border: '1px solid #ccc',
-                        borderRadius: '4px',
-                        minWidth: '40px',
-                        textAlign: 'center'
-                      }}>
-                        {totalPages}
-                      </span>
-                    </>
-                  )}
-                </div>
-                
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={(totalProducts > 0 && currentPage >= totalPages) || (totalProducts === 0 && dropiProducts.length < 10) || dropiProductsFetcher.state === "loading"}
-                  style={{
-                    padding: '8px 16px',
-                    background: (totalProducts > 0 && currentPage >= totalPages) || (totalProducts === 0 && dropiProducts.length < 10) ? '#e1e3e5' : '#5c6ac4',
-                    color: (totalProducts > 0 && currentPage >= totalPages) || (totalProducts === 0 && dropiProducts.length < 10) ? '#666' : '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: (totalProducts > 0 && currentPage >= totalPages) || (totalProducts === 0 && dropiProducts.length < 10) ? 'not-allowed' : 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    const isDisabled = (totalProducts > 0 && currentPage >= totalPages) || (totalProducts === 0 && dropiProducts.length < 10);
-                    if (!isDisabled) {
-                      e.currentTarget.style.background = '#4c5b9e';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    const isDisabled = (totalProducts > 0 && currentPage >= totalPages) || (totalProducts === 0 && dropiProducts.length < 10);
-                    if (!isDisabled) {
-                      e.currentTarget.style.background = '#5c6ac4';
-                    }
-                  }}
-                >
-                  Siguiente →
-                </button>
-              </div>
+              <Card className="mt-6">
+                <CardContent className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-2">
+                    <ShadcnButton
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1 || dropiProductsFetcher.state === "loading"}
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Anterior
+                    </ShadcnButton>
+                    <span className="text-sm text-gray-600 px-4">
+                      Página <span className="font-semibold">{currentPage}</span> de <span className="font-semibold">{Math.ceil(totalProducts / 10)}</span>
+                    </span>
+                    <ShadcnButton
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage * 10 >= totalProducts || dropiProductsFetcher.state === "loading"}
+                    >
+                      Siguiente
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </ShadcnButton>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Mostrando {((currentPage - 1) * 10) + 1} - {Math.min(currentPage * 10, totalProducts)} de {totalProducts} productos
+                  </div>
+                </CardContent>
+              </Card>
             )}
-
-            {dropiProducts.length > 0 && (
-              <div style={{ marginTop: '1rem', textAlign: 'center', color: '#666', fontSize: '14px' }}>
-                Mostrando {((currentPage - 1) * 10) + 1} - {Math.min(currentPage * 10, totalProducts)} de {totalProducts} productos
-              </div>
-            )}
-            </s-section>
-
-          </div>
           </>
         )}
-      </>
-    )}
 
         {activeTab === "sincronizada" && (
-          <s-section heading="Información Sincronizada">
-          {associations.length === 0 ? (
-            <s-box
-              padding="base"
-              borderWidth="base"
-              borderRadius="base"
-              background="info-subdued"
-            >
-        <s-paragraph>
-                No hay productos sincronizados aún. Use el botón 👁️ en un producto de Dropi para importar o vincular productos.
-              </s-paragraph>
-            </s-box>
-          ) : (
-            <div style={{ 
-              background: '#fff', 
-              borderRadius: '8px', 
-              overflow: 'hidden',
-              border: '1px solid #e1e3e5',
-              width: '100%',
-              overflowX: 'auto'
-            }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
-                <thead>
-                  <tr style={{ background: '#f5f5f5', borderBottom: '2px solid #e1e3e5' }}>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                      Producto Dropi
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                      Producto Shopify
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                      Tipo
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', color: '#333', fontSize: '14px' }}>
-                      Fecha
-                    </th>
-                    <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: '600', color: '#333', fontSize: '14px', width: '100px' }}>
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {associations.map((assoc: any, index: number) => (
-                    <tr 
-                      key={assoc.id}
-                      style={{ 
-                        borderBottom: '1px solid #e1e3e5',
-                        background: index % 2 === 0 ? '#fff' : '#fafafa'
-                      }}
-                    >
-                      <td style={{ padding: '16px', verticalAlign: 'middle' }}>
-                        <div style={{ fontWeight: '500', color: '#333', fontSize: '14px' }}>
-                          {assoc.dropiProductName || assoc.dropiProductId}
-                        </div>
-                        <div style={{ color: '#666', fontSize: '12px', marginTop: '4px' }}>
-                          ID: {assoc.dropiProductId}
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px', verticalAlign: 'middle' }}>
-                        <div style={{ fontWeight: '500', color: '#333', fontSize: '14px' }}>
-                          {assoc.shopifyProductTitle || assoc.shopifyProductId}
-                        </div>
-                        <div style={{ color: '#666', fontSize: '12px', marginTop: '4px' }}>
-                          ID: {assoc.shopifyProductId.split('/').pop()}
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px', verticalAlign: 'middle' }}>
-                        <div style={{
-                          padding: '6px 12px',
-                          background: assoc.importType === 'new' ? '#d4edda' : '#d1ecf1',
-                          color: assoc.importType === 'new' ? '#155724' : '#0c5460',
-                          borderRadius: '4px',
-                          fontWeight: '500',
-                          fontSize: '12px',
-                          display: 'inline-block',
-                          width: 'fit-content'
-                        }}>
-                          {assoc.importType === 'new' ? 'Nuevo' : 'Vinculado'}
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px', verticalAlign: 'middle' }}>
-                        <div style={{ color: '#666', fontSize: '14px' }}>
-                          {new Date(assoc.createdAt).toLocaleDateString('es-CO', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px', verticalAlign: 'middle', textAlign: 'center' }}>
-                        <button
-                          onClick={() => handleDeleteAssociation(assoc.id)}
-                          disabled={deleteFetcher.state === "submitting"}
-                          style={{
-                            padding: '6px 12px',
-                            background: deleteFetcher.state === "submitting" ? '#ccc' : '#dc3545',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: deleteFetcher.state === "submitting" ? 'not-allowed' : 'pointer',
-                            fontSize: '13px',
-                            fontWeight: '500',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            transition: 'background 0.2s'
-                          }}
-                          onMouseEnter={(e) => {
-                            if (deleteFetcher.state !== "submitting") {
-                              e.currentTarget.style.background = '#c82333';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (deleteFetcher.state !== "submitting") {
-                              e.currentTarget.style.background = '#dc3545';
-                            }
-                          }}
-                        >
-                          {deleteFetcher.state === "submitting" ? (
-                            <>
-                              <span style={{ 
-                                display: 'inline-block',
-                                width: '12px',
-                                height: '12px',
-                                border: '2px solid #fff',
-                                borderTopColor: 'transparent',
-                                borderRadius: '50%',
-                                animation: 'spin 0.6s linear infinite'
-                              }}></span>
-                              Eliminando...
-                            </>
-                          ) : (
-                            <>
-                              🗑️ Eliminar
-                            </>
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          </s-section>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Link2 className="h-5 w-5" />
+                Productos Sincronizados
+              </CardTitle>
+              <CardDescription>
+                Productos de Dropi asociados con productos de Shopify
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {associations.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Link2 className="h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No hay productos sincronizados
+                  </h3>
+                  <p className="text-sm text-gray-500 text-center max-w-md mb-4">
+                    Use el botón <Eye className="h-4 w-4 inline mx-1" /> en un producto de Dropi para importar o vincular productos.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50 border-b-2 border-gray-200">
+                        <th className="px-4 py-3 text-left font-semibold text-gray-700 text-sm">Producto Dropi</th>
+                        <th className="px-4 py-3 text-left font-semibold text-gray-700 text-sm">Producto Shopify</th>
+                        <th className="px-4 py-3 text-center font-semibold text-gray-700 text-sm">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {associations.map((assoc: any) => (
+                        <tr key={assoc.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-4">
+                            <div className="font-medium text-gray-900 text-sm">{assoc.dropiProductName}</div>
+                            <div className="text-xs text-gray-500 mt-1">ID Dropi: {assoc.dropiProductId}</div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="font-medium text-gray-900 text-sm">{assoc.shopifyProductTitle}</div>
+                            <div className="text-xs text-gray-500 mt-1">ID Shopify: {assoc.shopifyProductId}</div>
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <ShadcnButton
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteAssociation(assoc.id)}
+                              disabled={deleteFetcher.state === "submitting"}
+                            >
+                              {deleteFetcher.state === "submitting" ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Eliminando...
+                                </>
+                              ) : (
+                                <>
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Eliminar
+                                </>
+                              )}
+                            </ShadcnButton>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
-
-        <s-section heading="Información">
-        <s-paragraph>
-            Esta página le permite asociar productos de Dropi con productos de Shopify para sincronización automática.
-        </s-paragraph>
-        <s-paragraph>
-            Una vez asociados, podrá asignar campos personalizados del bot de Ecomdrop para personalización automática.
-        </s-paragraph>
-      </s-section>
-      </s-page>
+        </div>
+      </div>
 
       {/* Modales de Loading y Success */}
       <LoadingModal 
@@ -1338,7 +1101,6 @@ export default function ProductsPage() {
                     )}
                   </div>
                 </label>
-
 
                 <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '1rem', cursor: 'pointer' }}>
                   <input

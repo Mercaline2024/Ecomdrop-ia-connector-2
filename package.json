@@ -26,6 +26,8 @@
   "dependencies": {
     "@prisma/client": "^6.16.3",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@react-router/dev": "^7.9.3",
     "@react-router/fs-routes": "^7.9.3",
