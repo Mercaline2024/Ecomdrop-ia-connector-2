@@ -942,240 +942,208 @@ export default function ProductsPage() {
 
               {/* Variant Associations - Asociar variantes de Dropi con Shopify */}
               {selectedShopifyProduct && dropiVariations.length > 0 && (
-                <div style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ marginBottom: '8px', fontSize: '16px', fontWeight: '600' }}>Asociar Variantes</h3>
-                  <p style={{ fontSize: '12px', color: '#666', marginBottom: '12px' }}>
-                    Asocia las variantes del producto Dropi con las variantes del producto Shopify seleccionado
-                  </p>
-
-                  {selectedShopifyProductVariants.length > 0 ? (
-                    <div style={{
-                      border: '1px solid #e1e3e5',
-                      borderRadius: '4px',
-                      padding: '12px',
-                      maxHeight: '400px',
-                      overflowY: 'auto'
-                    }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                          <tr style={{ borderBottom: '2px solid #e1e3e5' }}>
-                            <th style={{ padding: '8px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Variante Dropi</th>
-                            <th style={{ padding: '8px', textAlign: 'left', fontWeight: '600', fontSize: '14px' }}>Asociar con Variante Shopify</th>
-                          </tr>
-                        </thead>
-                        <tbody>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Asociar Variantes</CardTitle>
+                    <CardDescription>
+                      Asocia las variantes del producto Dropi con las variantes del producto Shopify seleccionado
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {selectedShopifyProductVariants.length > 0 ? (
+                      <div className="max-h-[400px] overflow-y-auto rounded-md border border-gray-200 p-4">
+                        <div className="space-y-4">
                           {dropiVariations.map((dropiVar: any, idx: number) => {
                             const dropiVarId = dropiVar.id?.toString() || `dropi-${idx}`;
                             return (
-                              <tr key={idx} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                                <td style={{ padding: '12px', verticalAlign: 'middle' }}>
-                                  <div style={{ fontWeight: '500', fontSize: '14px' }}>
+                              <div key={idx} className="flex items-center gap-4 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                                <div className="flex-1">
+                                  <div className="font-medium text-sm text-gray-900">
                                     {dropiVar.color || dropiVar.option1 || dropiVar.name || `Variante ${idx + 1}`}
                                     {dropiVar.size || dropiVar.option2 ? ` - ${dropiVar.size || dropiVar.option2}` : ''}
                                   </div>
                                   {dropiVar.sku && (
-                                    <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                                    <div className="text-xs text-gray-500 mt-1">
                                       SKU: {dropiVar.sku}
                                     </div>
                                   )}
-                                </td>
-                                <td style={{ padding: '12px', verticalAlign: 'middle' }}>
-                                  <select
+                                </div>
+                                <div className="flex-1">
+                                  <Select
                                     value={variantAssociations[dropiVarId] || ""}
-                                    onChange={(e) => {
+                                    onValueChange={(value) => {
                                       setVariantAssociations(prev => ({
                                         ...prev,
-                                        [dropiVarId]: e.target.value
+                                        [dropiVarId]: value
                                       }));
                                     }}
-                                    style={{
-                                      width: '100%',
-                                      padding: '8px',
-                                      border: '1px solid #ccc',
-                                      borderRadius: '4px',
-                                      fontSize: '14px'
-                                    }}
                                   >
-                                    <option value="">-- Seleccione una variante --</option>
-                                    {selectedShopifyProductVariants.map((shopifyVar: any) => (
-                                      <option key={shopifyVar.id} value={shopifyVar.id}>
-                                        {shopifyVar.title} 
-                                        {shopifyVar.sku ? ` (SKU: ${shopifyVar.sku})` : ''}
-                                        {shopifyVar.price ? ` - $${parseFloat(shopifyVar.price).toFixed(2)}` : ''}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </td>
-                              </tr>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Seleccionar variante Shopify" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="">-- Seleccione una variante --</SelectItem>
+                                      {selectedShopifyProductVariants.map((shopifyVar: any) => (
+                                        <SelectItem key={shopifyVar.id} value={shopifyVar.id}>
+                                          {shopifyVar.title} 
+                                          {shopifyVar.sku ? ` (SKU: ${shopifyVar.sku})` : ''}
+                                          {shopifyVar.price ? ` - $${parseFloat(shopifyVar.price).toFixed(2)}` : ''}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
                             );
                           })}
-                        </tbody>
-                      </table>
-                    </div>
-                  ) : shopifyProductVariantsFetcher.state !== "loading" ? (
-                    <div style={{ 
-                      padding: '12px', 
-                      background: '#fff3cd', 
-                      border: '1px solid #ffc107',
-                      borderRadius: '4px',
-                      color: '#856404',
-                      fontSize: '14px'
-                    }}>
-                      ⚠️ El producto seleccionado no tiene variantes. Solo podrás sincronizar el producto principal.
-                    </div>
-                  ) : null}
-                </div>
+                        </div>
+                      </div>
+                    ) : shopifyProductVariantsFetcher.state !== "loading" ? (
+                      <Card className="border-amber-200 bg-amber-50">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-2 text-amber-800">
+                            <AlertCircle className="h-5 w-5" />
+                            <p className="text-sm">
+                              El producto seleccionado no tiene variantes. Solo podrás sincronizar el producto principal.
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : null}
+                  </CardContent>
+                </Card>
               )}
 
-              {/* Options */}
-              <div style={{ marginBottom: '2rem' }}>
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '1rem', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={saveDropiName}
-                    onChange={(e) => setSaveDropiName(e.target.checked)}
-                    style={{ marginTop: '4px' }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: '500', marginBottom: '4px' }}>Guardar nombre dropi</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
-                      Si desmarca esta opción, el nombre del producto no se guardará. Si el SKU no existe, esta opción se ignorará.
+              {/* Opciones de Sincronización */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Opciones de Sincronización</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={saveDropiName}
+                      onChange={(e) => setSaveDropiName(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm mb-1">Guardar nombre/título de Dropi</div>
+                      <div className="text-xs text-gray-600">
+                        Si desmarca esta opción, el nombre del producto no se guardará. Si el SKU no existe, esta opción se ignorará.
+                      </div>
+                      {saveDropiName && (
+                        <Input
+                          type="text"
+                          value={modalProduct.name || modalProduct.title || ''}
+                          readOnly
+                          className="mt-2"
+                        />
+                      )}
                     </div>
-                    {saveDropiName && (
-                      <input
-                        type="text"
-                        value={modalProduct.name || modalProduct.title || ''}
-                        readOnly
-                        style={{
-                          width: '100%',
-                          padding: '8px',
-                          marginTop: '8px',
-                          border: '1px solid #ccc',
-                          borderRadius: '4px',
-                          fontSize: '14px'
-                        }}
-                      />
-                    )}
-                  </div>
-                </label>
+                  </label>
 
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '1rem', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={saveDropiDescription}
-                    onChange={(e) => setSaveDropiDescription(e.target.checked)}
-                    style={{ marginTop: '4px' }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: '500', marginBottom: '4px' }}>Guardar descripción dropi</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
-                      Si desmarca esta opción, la descripción del producto no se guardará.
-                    </div>
-                    {saveDropiDescription && modalProduct.description && (
-                      <textarea
-                        value={modalProduct.description}
-                        readOnly
-                        style={{
-                          width: '100%',
-                          padding: '8px',
-                          marginTop: '8px',
-                          border: '1px solid #ccc',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          minHeight: '80px',
-                          resize: 'vertical'
-                        }}
-                      />
-                    )}
-                  </div>
-                </label>
+                  <Separator />
 
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '1rem', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={useSuggestedBarcode}
-                    onChange={(e) => setUseSuggestedBarcode(e.target.checked)}
-                    style={{ marginTop: '4px' }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: '500', marginBottom: '4px' }}>Establecer código de barras sugerido</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
-                      Si desmarca esta opción, el campo código de barras de los productos a importar estará vacío.
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={saveDropiDescription}
+                      onChange={(e) => setSaveDropiDescription(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm mb-1">Guardar descripción de Dropi</div>
+                      <div className="text-xs text-gray-600">
+                        Si desmarca esta opción, la descripción del producto no se guardará.
+                      </div>
+                      {saveDropiDescription && modalProduct.description && (
+                        <textarea
+                          value={modalProduct.description}
+                          readOnly
+                          className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] resize-y"
+                        />
+                      )}
                     </div>
-                  </div>
-                </label>
+                  </label>
 
-                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={saveDropiImages}
-                    onChange={(e) => setSaveDropiImages(e.target.checked)}
-                    style={{ marginTop: '4px' }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: '500', marginBottom: '4px' }}>Guardar imágenes dropi</div>
-                    <div style={{ fontSize: '12px', color: '#666' }}>
-                      Al marcar esta opción, si el producto a importar se está vinculando a uno existente, sus imágenes serán remplazadas. Si desmarca esta opción, las imágenes del producto no se guardarán.
+                  <Separator />
+
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={useSuggestedBarcode}
+                      onChange={(e) => setUseSuggestedBarcode(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm mb-1">Usar código de barras sugerido por Dropi</div>
+                      <div className="text-xs text-gray-600">
+                        Si desmarca esta opción, el campo código de barras de los productos a importar estará vacío.
+                      </div>
                     </div>
-                  </div>
-                </label>
-              </div>
+                  </label>
+
+                  <Separator />
+
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={saveDropiImages}
+                      onChange={(e) => setSaveDropiImages(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm mb-1">Guardar imágenes de Dropi</div>
+                      <div className="text-xs text-gray-600">
+                        Al marcar esta opción, si el producto a importar se está vinculando a uno existente, sus imágenes serán remplazadas. Si desmarca esta opción, las imágenes del producto no se guardarán.
+                      </div>
+                    </div>
+                  </label>
+                </CardContent>
+              </Card>
 
               {/* Info message */}
-              <div style={{
-                padding: '12px',
-                background: '#e7f3ff',
-                borderRadius: '4px',
-                marginBottom: '1.5rem',
-                fontSize: '14px',
-                color: '#0066cc'
-              }}>
-                Debido a cambios en Shopify, desde ahora, cada que importes un producto también se importará el stock desde dropi.
-              </div>
+              <Card className="border-blue-200 bg-blue-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-2 text-blue-800">
+                    <AlertCircle className="h-5 w-5 mt-0.5" />
+                    <p className="text-sm">
+                      Debido a cambios en Shopify, desde ahora, cada que importes un producto también se importará el stock desde dropi.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Footer */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '1rem',
-              padding: '1.5rem',
-              borderTop: '1px solid #e1e3e5'
-            }}>
-              <button
+            <DialogFooter>
+              <ShadcnButton
+                variant="outline"
                 onClick={() => setModalOpen(false)}
-                style={{
-                  padding: '10px 20px',
-                  background: '#e1e3e5',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
               >
                 Cancelar
-              </button>
-              <button
+              </ShadcnButton>
+              <ShadcnButton
                 onClick={handleImport}
                 disabled={importFetcher.state === "submitting" || !selectedShopifyProduct}
-                style={{
-                  padding: '10px 20px',
-                  background: (importFetcher.state === "submitting" || !selectedShopifyProduct) ? '#ccc' : '#5c6ac4',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: (importFetcher.state === "submitting" || !selectedShopifyProduct) ? 'not-allowed' : 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
+                className="bg-purple-600 hover:bg-purple-700"
               >
-                {importFetcher.state === "submitting" ? "Sincronizando..." : "Sincronizar"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                {importFetcher.state === "submitting" ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Sincronizando...
+                  </>
+                ) : (
+                  <>
+                    <Link2 className="h-4 w-4 mr-2" />
+                    Sincronizar Producto
+                  </>
+                )}
+              </ShadcnButton>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
     </>
   );
 }
