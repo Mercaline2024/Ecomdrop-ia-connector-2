@@ -1,0 +1,21 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "3ac9cc1ea7ce564db26a01257b570cb8"
+name = "Ecomdrop  IA Connector"
+application_url = "https://connector.ecomdrop.io"
+embedded = true
+
+[webhooks]
+api_version = "2025-10"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_customers,write_customers,write_draft_orders,read_draft_orders,read_files,write_files,read_orders,write_orders,read_products,write_products,read_themes,write_themes,customer_read_orders,customer_write_orders,unauthenticated_read_product_tags"
+optional_scopes = [ "read_script_tags", "write_script_tags" ]
+use_legacy_install_flow = false
+
+[auth]
+redirect_urls = [ "https://connector.ecomdrop.io/api/auth" ]
+
+[build]
+automatically_update_urls_on_dev = true
