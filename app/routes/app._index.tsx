@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { LoaderFunctionArgs } from "react-router";
 import { useFetcher, useLoaderData } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
+import { LoadingModal } from "../components/modals/LoadingModal";
+import { SuccessModal } from "../components/modals/SuccessModal";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session, admin } = await authenticate.admin(request);
@@ -15,45 +17,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       })
     : null;
 
-  // Fetch Shopify products
-  let shopifyProducts: any[] = [];
-  if (session?.shop) {
-    try {
-  const response = await admin.graphql(
-    `#graphql
-          query getProducts {
-            products(first: 50) {
-              edges {
-                node {
-            id
-            title
-            handle
-            status
-                  featuredImage {
-                    url
-                    altText
-                  }
-            variants(first: 10) {
-              edges {
-                node {
-                  id
-                        title
-                  price
-                      }
-                }
-              }
-            }
-          }
-        }
-          }`
-      );
-      
-      const data = await response.json();
-      shopifyProducts = data.data?.products?.edges?.map((edge: any) => edge.node) || [];
-    } catch (error) {
-      console.error("Error fetching Shopify products:", error);
-    }
-  }
+  // Shopify products are fetched on-demand when needed in the modal
+  // No longer fetching all products upfront
 
   // Get product associations
   let associations: any[] = [];
@@ -70,18 +35,21 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   return {
     configuration,
-    shopifyProducts,
     associations,
   };
 };
 
 export default function ProductsPage() {
-  const { configuration, shopifyProducts, associations: initialAssociations } = useLoaderData<typeof loader>();
+  const { configuration, associations: initialAssociations } = useLoaderData<typeof loader>();
   const dropiProductsFetcher = useFetcher();
   const importFetcher = useFetcher();
   const shopifyProductVariantsFetcher = useFetcher();
+  const shopifyProductsFetcher = useFetcher();
   const deleteFetcher = useFetcher();
   const shopify = useAppBridge();
+  
+  // Estado para productos de Shopify (cargados dinámicamente cuando se abre el modal)
+  const [shopifyProducts, setShopifyProducts] = useState<any[]>([]);
   
   const [activeTab, setActiveTab] = useState<"productos" | "sincronizada">("productos");
   const [dropiProducts, setDropiProducts] = useState<any[]>([]);
@@ -103,6 +71,15 @@ export default function ProductsPage() {
   const [saveDropiDescription, setSaveDropiDescription] = useState(true);
   const [useSuggestedBarcode, setUseSuggestedBarcode] = useState(false);
   const [saveDropiImages, setSaveDropiImages] = useState(true);
+  
+  // Estados para modales de loading y success
+  const [loadingModalOpen, setLoadingModalOpen] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  
+  // Referencias para prevenir procesamiento duplicado
+  const processedImportRef = useRef<string | null>(null);
+  const processedDeleteRef = useRef<string | null>(null);
+  const shopifyProductsLoadedRef = useRef<boolean>(false); // Para evitar recargar productos de Shopify
 
   // Load Dropi products on mount
   useEffect(() => {
@@ -177,6 +154,34 @@ export default function ProductsPage() {
     shopify.toast.show("Funcionalidad de asociación en desarrollo");
   };
 
+  // Cargar productos de Shopify cuando se abre el modal (solo una vez por sesión)
+  useEffect(() => {
+    // Solo cargar si:
+    // 1. El modal está abierto
+    // 2. No hemos cargado productos antes (usando ref para persistir entre aperturas/cierres)
+    // 3. No hay productos en el estado actual (doble verificación)
+    // 4. El fetcher está en estado idle (no está cargando)
+    // 5. El fetcher no tiene datos ya cargados
+    if (
+      modalOpen && 
+      !shopifyProductsLoadedRef.current && 
+      shopifyProducts.length === 0 && 
+      shopifyProductsFetcher.state === "idle" &&
+      !shopifyProductsFetcher.data // Verificar que no hay datos ya cargados
+    ) {
+      shopifyProductsLoadedRef.current = true; // Marcar como cargado ANTES de hacer la petición
+      shopifyProductsFetcher.load("/api/shopify/products");
+    }
+  }, [modalOpen]); // Solo depende de modalOpen, no de shopifyProducts.length para evitar recargas
+
+  // Manejar respuesta de productos de Shopify
+  useEffect(() => {
+    if (shopifyProductsFetcher.data?.success && shopifyProductsFetcher.data.products) {
+      setShopifyProducts(shopifyProductsFetcher.data.products);
+      // Los productos ya están cargados, no necesitamos recargarlos
+    }
+  }, [shopifyProductsFetcher.data]);
+
   // Abrir modal de importación
   const openImportModal = (product: any) => {
     setModalProduct(product);
@@ -216,20 +221,33 @@ export default function ProductsPage() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     
-    if (deleteFetcher.data?.success) {
+    // Solo procesar si el fetcher está en estado "idle" (ha completado) y tiene datos
+    if (deleteFetcher.state !== 'idle' || !deleteFetcher.data) return;
+    
+    // Crear un identificador único para esta respuesta
+    const responseId = JSON.stringify(deleteFetcher.data);
+    
+    // Si ya procesamos esta respuesta, ignorar
+    if (processedDeleteRef.current === responseId) return;
+    
+    // Marcar como procesada
+    processedDeleteRef.current = responseId;
+    
+    if (deleteFetcher.data.success) {
       shopify.toast.show(deleteFetcher.data.message || "Asociación eliminada exitosamente");
-      // Remover la asociación de la lista
+      // Remover la asociación de la lista SIN recargar el loader
+      // Esto evita que se recarguen los productos de Dropi
       const associationId = deleteFetcher.data.associationId;
       if (associationId) {
         setAssociations(prev => prev.filter((assoc: any) => assoc.id !== associationId));
-      } else {
-        // Si no tenemos el ID, recargar la página
-        window.location.reload();
       }
-    } else if (deleteFetcher.data?.error) {
+      // NO usar revalidator.revalidate() aquí porque recarga el loader
+      // y causa que se recarguen los productos de Dropi innecesariamente
+      // La asociación ya se eliminó localmente arriba
+    } else if (deleteFetcher.data.error) {
       shopify.toast.show(`Error: ${deleteFetcher.data.error}`);
     }
-  }, [deleteFetcher.data]);
+  }, [deleteFetcher.state, deleteFetcher.data]);
 
   // Función para eliminar una asociación
   const handleDeleteAssociation = (associationId: string) => {
@@ -276,6 +294,10 @@ export default function ProductsPage() {
     formData.append("useSuggestedBarcode", useSuggestedBarcode.toString());
     formData.append("saveDropiImages", saveDropiImages.toString());
 
+    // Cerrar el modal de configuración y mostrar el modal de loading
+    setModalOpen(false);
+    setLoadingModalOpen(true);
+
     importFetcher.submit(formData, {
       method: "POST",
       action: "/api/products/import"
@@ -287,22 +309,47 @@ export default function ProductsPage() {
     // Solo ejecutar en el cliente
     if (typeof window === 'undefined') return;
     
-    if (importFetcher.data?.success) {
-      shopify.toast.show(importFetcher.data.message || "Producto procesado exitosamente");
-      setModalOpen(false);
-      setModalProduct(null);
+    // Solo procesar si el fetcher está en estado "idle" (ha completado) y tiene datos
+    if (importFetcher.state !== 'idle' || !importFetcher.data) return;
+    
+    // Crear un identificador único para esta respuesta
+    const responseId = JSON.stringify(importFetcher.data);
+    
+    // Si ya procesamos esta respuesta, ignorar
+    if (processedImportRef.current === responseId) return;
+    
+    // Marcar como procesada
+    processedImportRef.current = responseId;
+    
+    if (importFetcher.data.success) {
+      // Cerrar el modal de loading y mostrar el modal de éxito
+      setLoadingModalOpen(false);
       
-      // Actualizar asociaciones
+      // Actualizar asociaciones localmente ANTES de mostrar el modal de éxito
+      // Esto evita que se recarguen los productos de Dropi
       if (importFetcher.data.association) {
         setAssociations(prev => [importFetcher.data.association, ...prev]);
       }
       
-      // Recargar asociaciones del servidor
-      window.location.reload();
-    } else if (importFetcher.data?.error) {
+      // Limpiar el estado del modal de configuración
+      setModalProduct(null);
+      setSelectedShopifyProduct("");
+      setSelectedShopifyProductVariants([]);
+      setVariantAssociations({});
+      
+      // Mostrar modal de éxito
+      setSuccessModalOpen(true);
+      
+      // NO usar revalidator.revalidate() aquí porque recarga el loader
+      // y causa que se recarguen los productos de Dropi innecesariamente
+      // Las asociaciones ya se actualizaron localmente arriba
+      // Los productos de Shopify se mantienen cargados para la próxima vez que se abra el modal
+    } else if (importFetcher.data.error) {
+      // Cerrar el modal de loading si hay error
+      setLoadingModalOpen(false);
       shopify.toast.show(`Error: ${importFetcher.data.error}`);
     }
-  }, [importFetcher.data]);
+  }, [importFetcher.state, importFetcher.data]);
 
   return (
     <>
@@ -861,75 +908,6 @@ export default function ProductsPage() {
             )}
             </s-section>
 
-          <s-section heading="Productos de Shopify">
-            {shopifyProducts.length === 0 ? (
-              <s-box
-                padding="base"
-                borderWidth="base"
-                borderRadius="base"
-                background="info-subdued"
-              >
-                <s-paragraph>
-                  No se encontraron productos en su tienda de Shopify
-                </s-paragraph>
-              </s-box>
-            ) : (
-              <s-stack direction="block" gap="base">
-                {shopifyProducts.map((product: any) => (
-                  <s-box
-                    key={product.id}
-                    padding="base"
-                    borderWidth="base"
-                    borderRadius="base"
-                    background={selectedShopifyProduct === product.id ? "selected" : "subdued"}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => setSelectedShopifyProduct(product.id)}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div>
-                        <s-heading size="small">{product.title}</s-heading>
-                        <s-text tone="subdued">
-                          Status: {product.status} | Variantes: {product.variants.edges.length}
-                        </s-text>
-                      </div>
-                      {selectedShopifyProduct === product.id && (
-                        <s-text tone="success">✓ Seleccionado</s-text>
-                      )}
-                    </div>
-              </s-box>
-                ))}
-            </s-stack>
-        )}
-      </s-section>
-
-            {selectedShopifyProduct && selectedDropiProduct && (
-              <s-section heading="Asociar Productos">
-                <s-box
-                  padding="large"
-                  borderWidth="base"
-                  borderRadius="base"
-                  background="success-subdued"
-                >
-        <s-paragraph>
-                    <strong>Listo para asociar:</strong>
-        </s-paragraph>
-                  <s-text>
-                    Producto Dropi: {dropiProducts.find(p => p.id === selectedDropiProduct)?.name || selectedDropiProduct}
-                  </s-text>
-                  <s-text>
-                    Producto Shopify: {shopifyProducts.find(p => p.id === selectedShopifyProduct)?.title || selectedShopifyProduct}
-                  </s-text>
-                  <div style={{ marginTop: '1rem' }}>
-                    <s-button 
-                      variant="primary"
-                      onClick={handleAssociate}
-                    >
-                      Asociar Productos
-                    </s-button>
-                  </div>
-                </s-box>
-              </s-section>
-            )}
           </div>
           </>
         )}
@@ -1096,6 +1074,22 @@ export default function ProductsPage() {
       </s-section>
       </s-page>
 
+      {/* Modales de Loading y Success */}
+      <LoadingModal 
+        open={loadingModalOpen}
+        title="Importando producto"
+        description="Por favor espere..."
+      />
+      <SuccessModal
+        open={successModalOpen}
+        onClose={() => {
+          setSuccessModalOpen(false);
+        }}
+        title="Listo!"
+        description="Producto importado con éxito"
+        buttonText="Cool"
+      />
+
       {/* Modal de Importación */}
       {modalOpen && modalProduct && (
         <div style={{
@@ -1174,11 +1168,17 @@ export default function ProductsPage() {
                   }}
                 >
                   <option value="">Haz click aquí para seleccionar un producto...</option>
-                  {shopifyProducts.map((product: any) => (
-                    <option key={product.id} value={product.id}>
-                      {product.title}
-                    </option>
-                  ))}
+                  {shopifyProductsFetcher.state === "loading" ? (
+                    <option value="" disabled>Cargando productos...</option>
+                  ) : shopifyProducts.length === 0 ? (
+                    <option value="" disabled>No hay productos disponibles</option>
+                  ) : (
+                    shopifyProducts.map((product: any) => (
+                      <option key={product.id} value={product.id}>
+                        {product.title}
+                      </option>
+                    ))
+                  )}
                 </select>
                 
                 {/* Loading indicator cuando se cargan variantes */}
