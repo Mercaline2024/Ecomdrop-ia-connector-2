@@ -54,6 +54,8 @@ docs
 Dockerfile*
 docker-compose*.yml
 .dockerignore
+# Pero mantener docker-entrypoint.sh
+!docker-entrypoint.sh
 
 # Windows specific
 Thumbs.db
