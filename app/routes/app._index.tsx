@@ -11,6 +11,21 @@ import { Input } from "../components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Separator } from "../components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import { 
   Search, 
   X, 
@@ -854,100 +869,73 @@ export default function ProductsPage() {
       />
 
       {/* Modal de Importación */}
-      {modalOpen && modalProduct && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '2rem'
-        }}>
-          <div style={{
-            background: '#fff',
-            borderRadius: '8px',
-            width: '100%',
-            maxWidth: '800px',
-            maxHeight: '90vh',
-            overflow: 'auto',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
-            position: 'relative'
-          }}>
-            {/* Header */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '1.5rem',
-              borderBottom: '1px solid #e1e3e5'
-            }}>
-              <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '600', color: '#333' }}>
-                Importar producto
-              </h2>
-              <button
-                onClick={() => setModalOpen(false)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  fontSize: '24px',
-                  cursor: 'pointer',
-                  color: '#666',
-                  padding: '0.5rem',
-                  lineHeight: 1
-                }}
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Content */}
-            <div style={{ padding: '1.5rem' }}>
-              <p style={{ marginBottom: '1.5rem', color: '#666', fontSize: '14px' }}>
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        {modalProduct && (
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-2xl">
+                <Link2 className="h-5 w-5" />
+                Asociar Producto Dropi con Shopify
+              </DialogTitle>
+              <DialogDescription>
                 Sincroniza el producto Dropi con un producto existente en tu tienda Shopify para que tus órdenes se vinculen correctamente.
-              </p>
+              </DialogDescription>
+            </DialogHeader>
 
-              {/* Select Existing Product */}
-              <div style={{ marginBottom: '2rem' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
+            <div className="space-y-6 py-4">
+              {/* Producto Dropi */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Producto Dropi</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="font-semibold text-base">{modalProduct.name || modalProduct.title}</div>
+                    <div className="text-sm text-gray-500">ID: {modalProduct.id} | SKU: {modalProduct.sku || 'N/A'}</div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Seleccionar Producto Shopify */}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold">
                   Selecciona el producto de tu tienda Shopify
                 </label>
-                <p style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+                <p className="text-xs text-gray-600">
                   El producto seleccionado se sincronizará con el producto Dropi
                 </p>
-                <select
+                <Select
                   value={selectedShopifyProduct}
-                  onChange={(e) => setSelectedShopifyProduct(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    fontSize: '14px'
-                  }}
+                  onValueChange={setSelectedShopifyProduct}
                 >
-                  <option value="">Haz click aquí para seleccionar un producto...</option>
-                  {shopifyProductsFetcher.state === "loading" ? (
-                    <option value="" disabled>Cargando productos...</option>
-                  ) : shopifyProducts.length === 0 ? (
-                    <option value="" disabled>No hay productos disponibles</option>
-                  ) : (
-                    shopifyProducts.map((product: any) => (
-                      <option key={product.id} value={product.id}>
-                        {product.title}
-                      </option>
-                    ))
-                  )}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Haz click aquí para seleccionar un producto..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {shopifyProductsFetcher.state === "loading" ? (
+                      <SelectItem value="" disabled>
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Cargando productos...
+                        </div>
+                      </SelectItem>
+                    ) : shopifyProducts.length === 0 ? (
+                      <SelectItem value="" disabled>No hay productos disponibles</SelectItem>
+                    ) : (
+                      shopifyProducts.map((product: any) => (
+                        <SelectItem key={product.id} value={product.id}>
+                          {product.title}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
                 
                 {/* Loading indicator cuando se cargan variantes */}
-                {shopifyProductVariantsFetcher.state === "loading" && (
-                  <div style={{ marginTop: '0.5rem', color: '#666', fontSize: '14px' }}>
-                    🔄 Cargando variantes del producto...
+                {shopifyProductVariantsFetcher.state === "loading" && selectedShopifyProduct && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Cargando variantes del producto...
                   </div>
                 )}
               </div>
