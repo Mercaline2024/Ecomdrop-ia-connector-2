@@ -29,7 +29,7 @@ services:
       - mysql_data:/var/lib/mysql
     
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -59,7 +59,10 @@ services:
   ## --------------------------- SHOPIFY APP --------------------------- ##
   
   shopify_app:
-    image: shopify-app_shopify_app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ecomdrop-ia-connector:latest
     
     networks:
       - EcomdropNet
@@ -72,7 +75,7 @@ services:
       SHOPIFY_API_KEY: ${SHOPIFY_API_KEY}
       SHOPIFY_API_SECRET: ${SHOPIFY_API_SECRET}
       SCOPES: read_products,write_products,read_orders,read_themes,write_themes
-      SHOPIFY_APP_URL: https://connector.ecomdrop.io
+      SHOPIFY_APP_URL: ${SHOPIFY_APP_URL}
       
       ## 🌐 Configuración
       NODE_ENV: production
@@ -80,13 +83,13 @@ services:
       TZ: America/Bogota
       
       ## 🎨 Theme 2.5 (Opcional)
-      THEME_2_5_GIT_REPO: ${THEME_2_5_GIT_REPO}
-      THEME_2_5_GIT_BRANCH: ${THEME_2_5_GIT_BRANCH}
-      THEME_2_5_GIT_PROVIDER: ${THEME_2_5_GIT_PROVIDER}
-      THEME_2_5_GIT_TOKEN: ${THEME_2_5_GIT_TOKEN}
+      THEME_2_5_GIT_REPO: ${THEME_2_5_GIT_REPO:-}
+      THEME_2_5_GIT_BRANCH: ${THEME_2_5_GIT_BRANCH:-main}
+      THEME_2_5_GIT_PROVIDER: ${THEME_2_5_GIT_PROVIDER:-github}
+      THEME_2_5_GIT_TOKEN: ${THEME_2_5_GIT_TOKEN:-}
       
       ## 🏪 Dominio (Opcional)
-      SHOP_CUSTOM_DOMAIN: ${SHOP_CUSTOM_DOMAIN}
+      SHOP_CUSTOM_DOMAIN: ${SHOP_CUSTOM_DOMAIN:-}
     
     deploy:
       mode: replicated
@@ -110,7 +113,7 @@ services:
       
       labels:
         - traefik.enable=true
-        - traefik.http.routers.shopify_app.rule=Host(`connector.ecomdrop.io`)
+        - traefik.http.routers.shopify_app.rule=Host(`${APP_DOMAIN}`)
         - traefik.http.routers.shopify_app.entrypoints=websecure
         - traefik.http.routers.shopify_app.tls.certresolver=letsencryptresolver
         - traefik.http.routers.shopify_app.service=shopify_app
@@ -121,7 +124,8 @@ services:
         - traefik.http.middlewares.shopify_app-headers.headers.sslredirect=true
     
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
 ## --------------------------- REDES --------------------------- ##
 
