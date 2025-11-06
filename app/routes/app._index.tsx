@@ -849,8 +849,8 @@ export default function ProductsPage() {
             </CardContent>
           </Card>
         )}
-        </div>
       </div>
+    </div>
 
       {/* Modales de Loading y Success */}
       <LoadingModal 
