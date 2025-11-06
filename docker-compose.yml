@@ -59,10 +59,13 @@ services:
   ## --------------------------- SHOPIFY APP --------------------------- ##
   
   shopify_app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: ecomdrop-ia-connector:latest
+    # Opción 1: Construir desde contexto local (desarrollo)
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    
+    # Opción 2: Usar imagen pre-construida desde Git (producción)
+    image: shopify-app_shopify_app:v2.5
     
     networks:
       - EcomdropNet
