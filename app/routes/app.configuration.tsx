@@ -9,6 +9,54 @@ import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { getCountryCallingCode } from 'react-phone-number-input';
 import type { Country } from 'react-phone-number-input';
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Separator } from "../components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import {
+  Settings,
+  Key,
+  ShoppingCart,
+  Package,
+  Bot,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  RefreshCw,
+  Store,
+  Globe,
+  Lock,
+  Edit,
+  X,
+  Plus,
+  Trash2,
+  FileText,
+  CreditCard,
+  HelpCircle,
+  ShoppingBag,
+  List,
+  Bell,
+  Sparkles,
+  BarChart3,
+  Info
+} from "lucide-react";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { session, admin } = await authenticate.admin(request);
@@ -221,647 +269,625 @@ export default function ConfigurationPage() {
   }, [dropiFetcher.data]);
 
   return (
-    <s-page heading="Configuración">
-      {/* Tabs Navigation */}
-      <div style={{ 
-        borderBottom: '2px solid #e1e3e5', 
-        marginBottom: '2rem' 
-      }}>
-        <div style={{ display: 'flex', gap: '0' }}>
-          <button
-            type="button"
-            onClick={() => setActiveTab("ecomdrop")}
-            style={{
-              padding: '1rem 2rem',
-              border: 'none',
-              background: activeTab === "ecomdrop" ? '#fff' : 'transparent',
-              color: activeTab === "ecomdrop" ? '#000' : '#666',
-              fontWeight: activeTab === "ecomdrop" ? 'bold' : 'normal',
-              borderBottom: activeTab === "ecomdrop" ? '3px solid #008060' : '3px solid transparent',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}
-          >
-            Ecomdrop
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("dropi")}
-            style={{
-              padding: '1rem 2rem',
-              border: 'none',
-              background: activeTab === "dropi" ? '#fff' : 'transparent',
-              color: activeTab === "dropi" ? '#000' : '#666',
-              fontWeight: activeTab === "dropi" ? 'bold' : 'normal',
-              borderBottom: activeTab === "dropi" ? '3px solid #008060' : '3px solid transparent',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}
-          >
-            Dropi
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("ai")}
-            style={{
-              padding: '1rem 2rem',
-              border: 'none',
-              background: activeTab === "ai" ? '#fff' : 'transparent',
-              color: activeTab === "ai" ? '#000' : '#666',
-              fontWeight: activeTab === "ai" ? 'bold' : 'normal',
-              borderBottom: activeTab === "ai" ? '3px solid #008060' : '3px solid transparent',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}
-          >
-            🤖 Configurar Asistente IA
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("status")}
-            style={{
-              padding: '1rem 2rem',
-              border: 'none',
-              background: activeTab === "status" ? '#fff' : 'transparent',
-              color: activeTab === "status" ? '#000' : '#666',
-              fontWeight: activeTab === "status" ? 'bold' : 'normal',
-              borderBottom: activeTab === "status" ? '3px solid #008060' : '3px solid transparent',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}
-          >
-            📊 Estado de Configuración
-          </button>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+            <Settings className="h-8 w-8 text-primary" />
+            Configuración
+          </h1>
+          <p className="text-gray-600">Gestiona las integraciones y configuraciones de tu aplicación</p>
         </div>
-      </div>
 
-      {/* Ecomdrop Tab */}
-      {activeTab === "ecomdrop" && (
-        <>
-          <s-section heading="Configuración de Integración">
-            <s-paragraph>
-              Conecte su cuenta de Ecomdrop IA y seleccione los flujos que desea utilizar.
-            </s-paragraph>
-
-            <apiKeyFetcher.Form method="post">
-              <input type="hidden" name="intent" value="save_api_key" />
-              <s-stack direction="block" gap="large">
-                <s-text-field
-                  name="apiKey"
-                  label="Clave API de Ecomdrop"
-                  type="password"
-                  value={configuration?.ecomdropApiKey || ""}
-                  placeholder="Ingrese su Clave API de Ecomdrop"
-                  helpText="Su clave API se almacena de forma segura y cifrada por tienda"
-                  error={apiKeyFetcher.data?.error}
-                />
-
-                <s-button 
-                  type="submit" 
-                  variant="primary"
-                  {...(apiKeyFetcher.state === "submitting" ? { loading: true } : {})}
-                >
-                  {configuration?.ecomdropApiKey ? "Actualizar Conexión y Refrescar Flujos" : "Conectar Ecomdrop IA y Refrescar Flujos"}
-                </s-button>
-              </s-stack>
-            </apiKeyFetcher.Form>
-          </s-section>
-
-          {configuration?.ecomdropApiKey && flows.length > 0 && (
-            <s-section heading="Configuración de Flujos">
-              <s-paragraph>
-                Seleccione qué flujos de Ecomdrop deben activarse para estos eventos de Shopify:
-              </s-paragraph>
-
-              <flowsFetcher.Form method="post">
-                <input type="hidden" name="intent" value="save_flows" />
-                <s-stack direction="block" gap="large">
-                  {/* Nuevo Pedido Flow */}
-                  <div>
-                    <s-label for="nuevoPedidoFlowId">
-                      <strong>🛒 Nuevo Pedido</strong>
-                    </s-label>
-                    <select
-                      id="nuevoPedidoFlowId"
-                      name="nuevoPedidoFlowId"
-                      value={selectedNuevoPedido}
-                      onChange={(e) => setSelectedNuevoPedido(e.currentTarget.value)}
-                      style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                    >
-                      <option value="">-- Seleccione un flujo --</option>
-                      {flows.map((flow) => (
-                        <option key={flow.id} value={flow.id}>
-                          {flow.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Carrito Abandonado Flow */}
-                  <div>
-                    <s-label for="carritoAbandonadoFlowId">
-                      <strong>📦 Carrito Abandonado</strong>
-                    </s-label>
-                    <select
-                      id="carritoAbandonadoFlowId"
-                      name="carritoAbandonadoFlowId"
-                      value={selectedCarritoAbandonado}
-                      onChange={(e) => setSelectedCarritoAbandonado(e.currentTarget.value)}
-                      style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                    >
-                      <option value="">-- Seleccione un flujo --</option>
-                      {flows.map((flow) => (
-                        <option key={flow.id} value={flow.id}>
-                          {flow.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <s-button 
-                    type="submit" 
-                    variant="primary"
-                    {...(flowsFetcher.state === "submitting" ? { loading: true } : {})}
-                  >
-                    Guardar Configuración de Flujos
-                  </s-button>
-                </s-stack>
-              </flowsFetcher.Form>
-            </s-section>
-          )}
-        </>
-      )}
-
-      {/* AI Assistant Tab */}
-      {activeTab === "ai" && (
-        <div style={{ padding: '2rem' }}>
-          {!configuration?.ecomdropApiKey ? (
-            /* Mensaje cuando no hay API Key configurada */
-            <div style={{
-              background: '#fff',
-              borderRadius: '16px',
-              padding: '3rem',
-              marginBottom: '2rem',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              border: '2px solid #ffc107',
-              textAlign: 'center'
-            }}>
-              <div style={{
-                fontSize: '4rem',
-                marginBottom: '1rem'
-              }}>
-                🔑
-              </div>
-              <h2 style={{
-                fontSize: '1.5rem',
-                margin: 0,
-                marginBottom: '1rem',
-                color: '#333',
-                fontWeight: '600'
-              }}>
-                API Key de Ecomdrop Requerida
-              </h2>
-              <p style={{
-                fontSize: '1rem',
-                color: '#666',
-                margin: 0,
-                marginBottom: '2rem',
-                lineHeight: '1.6'
-              }}>
-                Para configurar el Asistente IA, primero debes configurar tu Clave API de Ecomdrop.<br />
-                Esto es necesario para sincronizar la configuración con el sistema de Ecomdrop.
-              </p>
-              <button
-                type="button"
-                onClick={() => setActiveTab("ecomdrop")}
-                style={{
-                  padding: '1rem 2rem',
-                  background: 'linear-gradient(135deg, rgb(0, 32, 238) 0%, rgb(75, 81, 162) 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(0, 32, 238, 0.3)',
-                  transition: 'transform 0.2s, box-shadow 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 32, 238, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 32, 238, 0.3)';
-                }}
-              >
-                ⚙️ Ir a Configuración de Ecomdrop
-              </button>
-            </div>
-          ) : (
-            <>
-              <div style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                borderRadius: '16px',
-                padding: '1.5rem',
-                marginBottom: '2rem',
-                color: 'white',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.2)'
-              }}>
-                <h1 style={{ fontSize: '1.5rem', margin: 0, marginBottom: '0.5rem', fontWeight: '600' }}>
-                  🤖 Configurar Asistente IA
-                </h1>
-                <p style={{ fontSize: '0.9375rem', opacity: 0.9, margin: 0, lineHeight: '1.5' }}>
-                  Personaliza tu asistente de inteligencia artificial para brindar la mejor experiencia a tus clientes
-                </p>
-              </div>
-
-              <AIConfigurationForm aiConfiguration={aiConfiguration} shopify={shopify} />
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Dropi Tab */}
-      {activeTab === "dropi" && (
-        <s-section heading="Configuración de Dropi">
-          <s-paragraph>
-            Configure su integración con Dropi para habilitar la sincronización de órdenes.
-          </s-paragraph>
-
-          {!configuration?.ecomdropApiKey && (
-            <s-box
-              padding="base"
-              borderWidth="base"
-              borderRadius="base"
-              background="warning-subdued"
+        {/* Tabs Navigation Moderna */}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="flex space-x-8" aria-label="Tabs">
+            <button
+              type="button"
+              onClick={() => setActiveTab("ecomdrop")}
+              className={`
+                flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                ${activeTab === "ecomdrop"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }
+              `}
             >
-              <s-paragraph>
-                ⚠️ Primero debe configurar su clave API de Ecomdrop en la pestaña "Ecomdrop"
-              </s-paragraph>
-            </s-box>
-          )}
-
-          <dropiFetcher.Form method="post" action="/api/integrations/dropi/save">
-            <s-stack direction="block" gap="large">
-              <s-text-field
-                name="store_name"
-                label="Nombre de la Tienda"
-                value={dropiStoreName}
-                onChange={(e) => setDropiStoreName(e.currentTarget.value)}
-                placeholder="Ingrese el nombre de su tienda"
-                required
-                error={dropiFetcher.data?.error && dropiFetcher.data.error.includes("tienda") ? dropiFetcher.data.error : undefined}
-              />
-
-              <div>
-                <s-label for="country">
-                  <strong>País de Operación</strong>
-                </s-label>
-                <select
-                  id="country"
-                  name="country"
-                  value={dropiCountry}
-                  onChange={(e) => setDropiCountry(e.currentTarget.value)}
-                  style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                  required
-                >
-                  <option value="">-- Seleccione un país --</option>
-                  {countries.map((country) => (
-                    <option key={country.code} value={country.code}>
-                      {country.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Token Field with Edit Option */}
-              {configuration?.dropiToken && !editingDropiToken ? (
-                <div>
-                  <s-label for="dropi_token_display">
-                    <strong>Token de Dropi</strong>
-                  </s-label>
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '1rem',
-                    padding: '0.5rem',
-                    border: '1px solid #ccc',
-                    borderRadius: '4px',
-                    background: '#f5f5f5'
-                  }}>
-                    <span style={{ 
-                      fontFamily: 'monospace', 
-                      letterSpacing: '0.2em',
-                      userSelect: 'none'
-                    }}>
-                      •••••••••••••••••••••••••••••••••
-                    </span>
-                    <s-button 
-                      type="button"
-                      variant="secondary"
-                      size="small"
-                      onClick={() => setEditingDropiToken(true)}
-                    >
-                      Editar Token
-                    </s-button>
-                  </div>
-                  <s-text tone="subdued" style={{ marginTop: '0.25rem', fontSize: '0.875rem' }}>
-                    Token configurado y almacenado de forma segura
-                  </s-text>
-                </div>
-              ) : (
-                <s-text-field
-                  name="dropi_token"
-                  label="Token de Dropi"
-                  type="password"
-                  value={dropiToken}
-                  onChange={(e) => setDropiToken(e.currentTarget.value)}
-                  placeholder={configuration?.dropiToken ? "Ingrese el nuevo token" : "Ingrese su token de Dropi"}
-                  helpText="Su token se almacena de forma segura y cifrada"
-                  required={!configuration?.dropiToken || editingDropiToken}
-                  error={dropiFetcher.data?.error && dropiFetcher.data.error.includes("token") ? dropiFetcher.data.error : undefined}
-                />
-              )}
-              
-              {/* Only show required notice if editing existing token */}
-              {(configuration?.dropiToken && editingDropiToken) && (
-                <s-box
-                  padding="tight"
-                  background="info-subdued"
-                  borderRadius="base"
-                >
-                  <s-paragraph style={{ margin: 0, fontSize: '0.875rem' }}>
-                    ℹ️ Debe ingresar un nuevo token para actualizar la configuración
-                  </s-paragraph>
-                </s-box>
-              )}
-
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <s-button 
-                  type="submit" 
-                  variant="primary"
-                  {...(dropiFetcher.state === "submitting" ? { loading: true } : {})}
-                  disabled={!configuration?.ecomdropApiKey}
-                >
-                  {dropiFetcher.state === "submitting" ? "Guardando..." : 
-                   dropiFetcher.data?.success ? "Configuración guardada ✅" :
-                   configuration?.dropiToken && !editingDropiToken ? "Guardar Cambios" : 
-                   "Guardar"}
-                </s-button>
-                
-                {editingDropiToken && (
-                  <s-button 
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      setEditingDropiToken(false);
-                      setDropiToken("");
-                    }}
-                  >
-                    Cancelar
-                  </s-button>
-                )}
-              </div>
-            </s-stack>
-          </dropiFetcher.Form>
-        </s-section>
-      )}
-
-      {/* Status Tab */}
-      {activeTab === "status" && (
-        <div style={{ padding: '2rem' }}>
-          <h2 style={{ 
-            fontSize: '1.5rem', 
-            marginBottom: '2rem', 
-            color: '#333', 
-            fontWeight: '600' 
-          }}>
-            📊 Estado de Configuración
-          </h2>
-
-          {/* Estado de Configuración */}
-          <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ 
-              fontSize: '1.125rem', 
-              marginBottom: '1rem', 
-              color: '#333', 
-              fontWeight: '600' 
-            }}>
-              Estado de Configuración
-            </h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {/* Ecomdrop API Key Status */}
-              {configuration?.ecomdropApiKey && (
-                <div style={{
-                  background: '#f0f9ff',
-                  border: '1px solid #bfdbfe',
-                  borderRadius: '8px',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '1rem'
-                }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    background: '#10b981',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <span style={{ fontSize: '1.5rem' }}>✅</span>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{
-                      fontSize: '1rem',
-                      fontWeight: '600',
-                      color: '#333',
-                      marginBottom: '0.5rem'
-                    }}>
-                      Clave API de Ecomdrop configurada
-                    </div>
-                    <div style={{
-                      fontSize: '0.875rem',
-                      color: '#666'
-                    }}>
-                      Última actualización: {new Date(configuration.updatedAt).toLocaleString('es-ES')}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Dropi Status */}
-              {configuration?.dropiStoreName && (
-                <div style={{
-                  background: '#f0f9ff',
-                  border: '1px solid #bfdbfe',
-                  borderRadius: '8px',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: '1rem'
-                }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    background: '#10b981',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}>
-                    <span style={{ fontSize: '1.5rem' }}>✅</span>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{
-                      fontSize: '1rem',
-                      fontWeight: '600',
-                      color: '#333',
-                      marginBottom: '0.5rem'
-                    }}>
-                      Dropi configurado
-                    </div>
-                    <div style={{
-                      fontSize: '0.875rem',
-                      color: '#666',
-                      marginBottom: '0.25rem'
-                    }}>
-                      Tienda: {configuration.dropiStoreName}
-                    </div>
-                    <div style={{
-                      fontSize: '0.875rem',
-                      color: '#666'
-                    }}>
-                      País: {countries.find(c => c.code === configuration.dropiCountry)?.name || configuration.dropiCountry}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Configuraciones de Flujos Activas */}
-          {(configuration?.nuevoPedidoFlowId || configuration?.carritoAbandonadoFlowId) && (
-            <div style={{ marginBottom: '2rem' }}>
-              <h3 style={{ 
-                fontSize: '1.125rem', 
-                marginBottom: '1rem', 
-                color: '#333', 
-                fontWeight: '600' 
-              }}>
-                Configuraciones de Flujos Activas:
-              </h3>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {configuration.nuevoPedidoFlowId && (
-                  <div style={{
-                    background: '#fff',
-                    border: '1px solid #e1e3e5',
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem'
-                  }}>
-                    <span style={{ fontSize: '1.5rem' }}>🛒</span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontSize: '0.875rem',
-                        color: '#666',
-                        marginBottom: '0.25rem'
-                      }}>
-                        Nuevo Pedido:
-                      </div>
-                      <div style={{
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                        color: '#333'
-                      }}>
-                        {flows.find(f => f.id === configuration.nuevoPedidoFlowId)?.name || 'Flujo seleccionado'}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                {configuration.carritoAbandonadoFlowId && (
-                  <div style={{
-                    background: '#fff',
-                    border: '1px solid #e1e3e5',
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem'
-                  }}>
-                    <span style={{ fontSize: '1.5rem' }}>📦</span>
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontSize: '0.875rem',
-                        color: '#666',
-                        marginBottom: '0.25rem'
-                      }}>
-                        Carrito Abandonado:
-                      </div>
-                      <div style={{
-                        fontSize: '1rem',
-                        fontWeight: '500',
-                        color: '#333'
-                      }}>
-                        {flows.find(f => f.id === configuration.carritoAbandonadoFlowId)?.name || 'Flujo seleccionado'}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Próximos Pasos */}
-          <div>
-            <h3 style={{ 
-              fontSize: '1.125rem', 
-              marginBottom: '1rem', 
-              color: '#333', 
-              fontWeight: '600' 
-            }}>
-              Próximos Pasos
-            </h3>
-            
-            <div style={{
-              background: '#fff',
-              border: '1px solid #e1e3e5',
-              borderRadius: '8px',
-              padding: '1.5rem'
-            }}>
-              <ul style={{
-                margin: 0,
-                paddingLeft: '1.5rem',
-                listStyle: 'disc',
-                color: '#666'
-              }}>
-                <li style={{ marginBottom: '0.75rem', fontSize: '0.9375rem' }}>
-                  Configure su clave API de Ecomdrop para habilitar la integración
-                </li>
-                <li style={{ marginBottom: '0.75rem', fontSize: '0.9375rem' }}>
-                  Opcionalmente configure Dropi para sincronización de órdenes
-                </li>
-                <li style={{ marginBottom: '0.75rem', fontSize: '0.9375rem' }}>
-                  Seleccione flujos para activadores automáticos de eventos
-                </li>
-                <li style={{ fontSize: '0.9375rem' }}>
-                  Configure el Asistente IA para personalizar la experiencia del cliente
-                </li>
-              </ul>
-            </div>
-          </div>
+              <Key className="h-4 w-4" />
+              Ecomdrop
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("dropi")}
+              className={`
+                flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                ${activeTab === "dropi"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }
+              `}
+            >
+              <Package className="h-4 w-4" />
+              Dropi
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("ai")}
+              className={`
+                flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                ${activeTab === "ai"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }
+              `}
+            >
+              <Bot className="h-4 w-4" />
+              Asistente IA
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("status")}
+              className={`
+                flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                ${activeTab === "status"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }
+              `}
+            >
+              <BarChart3 className="h-4 w-4" />
+              Estado
+            </button>
+          </nav>
         </div>
-      )}
-    </s-page>
+
+        {/* Ecomdrop Tab */}
+        {activeTab === "ecomdrop" && (
+          <>
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  Configuración de Integración
+                </CardTitle>
+                <CardDescription>
+                  Conecte su cuenta de Ecomdrop IA y seleccione los flujos que desea utilizar.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <apiKeyFetcher.Form method="post">
+                  <input type="hidden" name="intent" value="save_api_key" />
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label htmlFor="apiKey" className="text-sm font-medium text-gray-700">
+                        Clave API de Ecomdrop
+                      </label>
+                      <Input
+                        id="apiKey"
+                        name="apiKey"
+                        type="password"
+                        value={configuration?.ecomdropApiKey || ""}
+                        placeholder="Ingrese su Clave API de Ecomdrop"
+                        className="w-full"
+                      />
+                      <p className="text-xs text-gray-500">
+                        Su clave API se almacena de forma segura y cifrada por tienda
+                      </p>
+                      {apiKeyFetcher.data?.error && (
+                        <p className="text-xs text-red-600">{apiKeyFetcher.data.error}</p>
+                      )}
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={apiKeyFetcher.state === "submitting"}
+                      className="w-full sm:w-auto"
+                    >
+                      {apiKeyFetcher.state === "submitting" ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Conectando...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          {configuration?.ecomdropApiKey ? "Actualizar Conexión y Refrescar Flujos" : "Conectar Ecomdrop IA y Refrescar Flujos"}
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </apiKeyFetcher.Form>
+              </CardContent>
+            </Card>
+
+            {configuration?.ecomdropApiKey && flows.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5" />
+                    Configuración de Flujos
+                  </CardTitle>
+                  <CardDescription>
+                    Seleccione qué flujos de Ecomdrop deben activarse para estos eventos de Shopify
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <flowsFetcher.Form method="post">
+                    <input type="hidden" name="intent" value="save_flows" />
+                    <div className="space-y-6">
+                      {/* Nuevo Pedido Flow */}
+                      <div className="space-y-2">
+                        <label htmlFor="nuevoPedidoFlowId" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                          <ShoppingCart className="h-4 w-4" />
+                          Nuevo Pedido
+                        </label>
+                        <Select
+                          value={selectedNuevoPedido}
+                          onValueChange={setSelectedNuevoPedido}
+                        >
+                          <SelectTrigger id="nuevoPedidoFlowId" name="nuevoPedidoFlowId">
+                            <SelectValue placeholder="Seleccione un flujo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {flows.map((flow) => (
+                              <SelectItem key={flow.id} value={flow.id}>
+                                {flow.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Carrito Abandonado Flow */}
+                      <div className="space-y-2">
+                        <label htmlFor="carritoAbandonadoFlowId" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                          <ShoppingBag className="h-4 w-4" />
+                          Carrito Abandonado
+                        </label>
+                        <Select
+                          value={selectedCarritoAbandonado}
+                          onValueChange={setSelectedCarritoAbandonado}
+                        >
+                          <SelectTrigger id="carritoAbandonadoFlowId" name="carritoAbandonadoFlowId">
+                            <SelectValue placeholder="Seleccione un flujo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {flows.map((flow) => (
+                              <SelectItem key={flow.id} value={flow.id}>
+                                {flow.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <Button
+                        type="submit"
+                        disabled={flowsFetcher.state === "submitting"}
+                        className="w-full sm:w-auto"
+                      >
+                        {flowsFetcher.state === "submitting" ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Guardando...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                            Guardar Configuración de Flujos
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </flowsFetcher.Form>
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )}
+
+        {/* AI Assistant Tab */}
+        {activeTab === "ai" && (
+          <div className="p-8">
+            {!configuration?.ecomdropApiKey ? (
+              <Card className="border-amber-200 bg-amber-50 mb-6">
+                <CardContent className="pt-6 text-center">
+                  <div className="text-6xl mb-4">🔑</div>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                    API Key de Ecomdrop Requerida
+                  </h2>
+                  <p className="text-gray-600 mb-6">
+                    Para configurar el Asistente IA, primero debes configurar tu Clave API de Ecomdrop.<br />
+                    Esto es necesario para sincronizar la configuración con el sistema de Ecomdrop.
+                  </p>
+                  <Button
+                    type="button"
+                    onClick={() => setActiveTab("ecomdrop")}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Ir a Configuración de Ecomdrop
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <Card className="mb-6 bg-gradient-to-r from-purple-600 to-purple-800 text-white border-0">
+                  <CardContent className="pt-6">
+                    <h1 className="text-xl font-semibold mb-2 flex items-center gap-2">
+                      <Bot className="h-5 w-5" />
+                      Configurar Asistente IA
+                    </h1>
+                    <p className="text-purple-100 text-sm">
+                      Personaliza tu asistente de inteligencia artificial para brindar la mejor experiencia a tus clientes
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <AIConfigurationForm aiConfiguration={aiConfiguration} shopify={shopify} />
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Dropi Tab */}
+        {activeTab === "dropi" && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Configuración de Dropi
+              </CardTitle>
+              <CardDescription>
+                Configure su integración con Dropi para habilitar la sincronización de órdenes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!configuration?.ecomdropApiKey && (
+                <Card className="mb-6 border-amber-200 bg-amber-50">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-2 text-amber-800">
+                      <AlertCircle className="h-5 w-5" />
+                      <p className="text-sm">
+                        Primero debe configurar su clave API de Ecomdrop en la pestaña "Ecomdrop"
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <dropiFetcher.Form method="post" action="/api/integrations/dropi/save">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label htmlFor="store_name" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <Store className="h-4 w-4" />
+                      Nombre de la Tienda
+                    </label>
+                    <Input
+                      id="store_name"
+                      name="store_name"
+                      value={dropiStoreName}
+                      onChange={(e) => setDropiStoreName(e.currentTarget.value)}
+                      placeholder="Ingrese el nombre de su tienda"
+                      required
+                      className="w-full"
+                    />
+                    {dropiFetcher.data?.error && dropiFetcher.data.error.includes("tienda") && (
+                      <p className="text-xs text-red-600">{dropiFetcher.data.error}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="country" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      País de Operación
+                    </label>
+                    <Select
+                      value={dropiCountry}
+                      onValueChange={setDropiCountry}
+                    >
+                      <SelectTrigger id="country" name="country">
+                        <SelectValue placeholder="Seleccione un país" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries.map((country) => (
+                          <SelectItem key={country.code} value={country.code}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Token Field with Edit Option */}
+                  {configuration?.dropiToken && !editingDropiToken ? (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                        <Lock className="h-4 w-4" />
+                        Token de Dropi
+                      </label>
+                      <div className="flex items-center gap-3 p-3 rounded-md border border-gray-200 bg-gray-50">
+                        <span className="font-mono text-sm tracking-wider text-gray-600 select-none">
+                          •••••••••••••••••••••••••••••••••
+                        </span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => setEditingDropiToken(true)}
+                          className="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-900"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Editar Token
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Token configurado y almacenado de forma segura
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <label htmlFor="dropi_token" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                        <Lock className="h-4 w-4" />
+                        Token de Dropi
+                      </label>
+                      <Input
+                        id="dropi_token"
+                        name="dropi_token"
+                        type="password"
+                        value={dropiToken}
+                        onChange={(e) => setDropiToken(e.currentTarget.value)}
+                        placeholder={configuration?.dropiToken ? "Ingrese el nuevo token" : "Ingrese su token de Dropi"}
+                        required={!configuration?.dropiToken || editingDropiToken}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-gray-500">
+                        Su token se almacena de forma segura y cifrada
+                      </p>
+                      {dropiFetcher.data?.error && dropiFetcher.data.error.includes("token") && (
+                        <p className="text-xs text-red-600">{dropiFetcher.data.error}</p>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Only show required notice if editing existing token */}
+                  {(configuration?.dropiToken && editingDropiToken) && (
+                    <Card className="border-blue-200 bg-blue-50">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-2 text-blue-800">
+                          <Info className="h-5 w-5" />
+                          <p className="text-sm">
+                            Debe ingresar un nuevo token para actualizar la configuración
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  <div className="flex gap-3 items-center">
+                    <Button
+                      type="submit"
+                      disabled={dropiFetcher.state === "submitting" || !configuration?.ecomdropApiKey}
+                      className="flex-1 sm:flex-none"
+                    >
+                      {dropiFetcher.state === "submitting" ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Guardando...
+                        </>
+                      ) : dropiFetcher.data?.success ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          Configuración guardada
+                        </>
+                      ) : configuration?.dropiToken && !editingDropiToken ? (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          Guardar Cambios
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-4 w-4 mr-2" />
+                          Guardar
+                        </>
+                      )}
+                    </Button>
+                    
+                    {editingDropiToken && (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setEditingDropiToken(false);
+                          setDropiToken("");
+                        }}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-900"
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Cancelar
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </dropiFetcher.Form>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Status Tab */}
+        {activeTab === "status" && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Estado de Configuración
+                </CardTitle>
+                <CardDescription>
+                  Revisa el estado de todas tus integraciones y configuraciones
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Ecomdrop API Key Status */}
+                {configuration?.ecomdropApiKey ? (
+                  <Card className="border-green-200 bg-green-50">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start gap-4">
+                        <div className="rounded-full bg-green-500 p-2 flex-shrink-0">
+                          <CheckCircle2 className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                            <Key className="h-4 w-4" />
+                            Clave API de Ecomdrop configurada
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Última actualización: {new Date(configuration.updatedAt).toLocaleString('es-ES')}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="border-gray-200 bg-gray-50">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start gap-4">
+                        <div className="rounded-full bg-gray-400 p-2 flex-shrink-0">
+                          <X className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900 mb-1">
+                            Clave API de Ecomdrop no configurada
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Configure su clave API en la pestaña "Ecomdrop"
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Dropi Status */}
+                {configuration?.dropiStoreName ? (
+                  <Card className="border-green-200 bg-green-50">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start gap-4">
+                        <div className="rounded-full bg-green-500 p-2 flex-shrink-0">
+                          <CheckCircle2 className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                            <Package className="h-4 w-4" />
+                            Dropi configurado
+                          </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Store className="h-3 w-3" />
+                              <span>Tienda: <strong>{configuration.dropiStoreName}</strong></span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Globe className="h-3 w-3" />
+                              <span>País: <strong>{countries.find(c => c.code === configuration.dropiCountry)?.name || configuration.dropiCountry}</strong></span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="border-gray-200 bg-gray-50">
+                    <CardContent className="pt-6">
+                      <div className="flex items-start gap-4">
+                        <div className="rounded-full bg-gray-400 p-2 flex-shrink-0">
+                          <X className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold text-gray-900 mb-1">
+                            Dropi no configurado
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Configure Dropi en la pestaña "Dropi"
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Configuraciones de Flujos Activas */}
+            {(configuration?.nuevoPedidoFlowId || configuration?.carritoAbandonadoFlowId) && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5" />
+                    Flujos Activos
+                  </CardTitle>
+                  <CardDescription>
+                    Flujos de Ecomdrop configurados para eventos de Shopify
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {configuration.nuevoPedidoFlowId && (
+                    <Card className="border-blue-200 bg-blue-50">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-full bg-blue-500 p-2">
+                            <ShoppingCart className="h-4 w-4 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-xs text-gray-600 mb-1">Nuevo Pedido</div>
+                            <div className="font-medium text-gray-900">
+                              {flows.find(f => f.id === configuration.nuevoPedidoFlowId)?.name || 'Flujo seleccionado'}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                  
+                  {configuration.carritoAbandonadoFlowId && (
+                    <Card className="border-purple-200 bg-purple-50">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-full bg-purple-500 p-2">
+                            <ShoppingBag className="h-4 w-4 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-xs text-gray-600 mb-1">Carrito Abandonado</div>
+                            <div className="font-medium text-gray-900">
+                              {flows.find(f => f.id === configuration.carritoAbandonadoFlowId)?.name || 'Flujo seleccionado'}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Próximos Pasos */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Info className="h-5 w-5" />
+                  Próximos Pasos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 list-disc list-inside text-sm text-gray-600">
+                  <li>Configure su clave API de Ecomdrop para habilitar la integración</li>
+                  <li>Opcionalmente configure Dropi para sincronización de órdenes</li>
+                  <li>Seleccione flujos para activadores automáticos de eventos</li>
+                  <li>Configure el Asistente IA para personalizar la experiencia del cliente</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -1169,983 +1195,631 @@ function AIConfigurationForm({ aiConfiguration, shopify }: { aiConfiguration: an
   };
 
   return (
-    <form onSubmit={handleSave}>
+    <form onSubmit={handleSave} className="space-y-6">
       {/* Información Básica */}
-      <div style={{
-        background: '#fff',
-        borderRadius: '12px',
-        padding: '2rem',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        border: '1px solid #e1e3e5'
-      }}>
-        <h2 style={{ fontSize: '1rem', marginTop: 0, marginBottom: '1rem', color: '#333', fontWeight: '600' }}>
-          📋 Información Básica
-        </h2>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <FileText className="h-5 w-5" />
+            Información Básica
+          </CardTitle>
+          <CardDescription>
+            Configura la información básica del asistente IA
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="agentName" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Bot className="h-4 w-4" />
+              Nombre del agente IA
+              <Info className="h-3 w-3 text-gray-400" />
+            </label>
+            <Input
+              id="agentName"
+              type="text"
+              value={agentName}
+              onChange={(e) => setAgentName(e.target.value)}
+              placeholder="Ej: Andrés"
+              className="w-full"
+            />
+          </div>
 
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#333', fontSize: '0.875rem' }}>
-            👤 Nombre del agente IA
-            <span style={{ color: '#999', fontSize: '0.75rem', marginLeft: '0.5rem' }}>ℹ️</span>
-          </label>
-          <input
-            type="text"
-            value={agentName}
-            onChange={(e) => setAgentName(e.target.value)}
-            placeholder="Ej: Andrés"
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              borderRadius: '8px',
-              border: '1px solid #ddd',
-              fontSize: '0.875rem',
-              fontFamily: 'inherit'
-            }}
-          />
-        </div>
+          <div className="space-y-2">
+            <label htmlFor="companyName" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Store className="h-4 w-4" />
+              Nombre de la empresa
+              <Info className="h-3 w-3 text-gray-400" />
+            </label>
+            <Input
+              id="companyName"
+              type="text"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder="Ej: ClickShop®"
+              className="w-full"
+            />
+          </div>
 
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#333', fontSize: '0.875rem' }}>
-            🏢 Nombre de la empresa
-            <span style={{ color: '#999', fontSize: '0.75rem', marginLeft: '0.5rem' }}>ℹ️</span>
-          </label>
-          <input
-            type="text"
-            value={companyName}
-            onChange={(e) => setCompanyName(e.target.value)}
-            placeholder="Ej: ClickShop®"
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              borderRadius: '8px',
-              border: '1px solid #ddd',
-              fontSize: '0.875rem',
-              fontFamily: 'inherit'
-            }}
-          />
-        </div>
-
-        <div>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: '#333', fontSize: '0.875rem' }}>
-            📝 Descripción de la empresa
-            <span style={{ color: '#999', fontSize: '0.75rem', marginLeft: '0.5rem' }}>ℹ️</span>
-          </label>
-          <textarea
-            value={companyDescription}
-            onChange={(e) => setCompanyDescription(e.target.value)}
-            placeholder="Describe tu empresa..."
-            rows={4}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              borderRadius: '8px',
-              border: '1px solid #ddd',
-              fontSize: '0.875rem',
-              fontFamily: 'inherit',
-              resize: 'vertical'
-            }}
-          />
-        </div>
-      </div>
+          <div className="space-y-2">
+            <label htmlFor="companyDescription" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Descripción de la empresa
+              <Info className="h-3 w-3 text-gray-400" />
+            </label>
+            <Textarea
+              id="companyDescription"
+              value={companyDescription}
+              onChange={(e) => setCompanyDescription(e.target.value)}
+              placeholder="Describe tu empresa..."
+              rows={4}
+              className="w-full resize-y"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Métodos de Pago */}
-      <div style={{
-        background: '#fff',
-        borderRadius: '12px',
-        padding: '2rem',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        border: '1px solid #e1e3e5'
-      }}>
-        <h2 style={{ fontSize: '1rem', marginTop: 0, marginBottom: '1rem', color: '#333', fontWeight: '600' }}>
-          💳 Métodos de pago
-          <span style={{ color: '#999', fontSize: '0.75rem', marginLeft: '0.5rem' }}>ℹ️</span>
-        </h2>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <CreditCard className="h-5 w-5" />
+            Métodos de Pago
+            <Info className="h-4 w-4 text-gray-400" />
+          </CardTitle>
+          <CardDescription>
+            Configura los métodos de pago que acepta tu tienda
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {paymentMethods.length === 0 ? (
+            <div className="py-8 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-sm text-gray-600">No hay métodos de pago agregados</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {paymentMethods.map((pm) => (
+                <Card key={pm.id} className="border-gray-200">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <Input
+                        type="text"
+                        value={pm.name}
+                        onChange={(e) => updatePaymentMethod(pm.id, 'name', e.target.value)}
+                        placeholder="Nombre del método de pago"
+                        className="flex-1"
+                      />
+                      <label className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-md hover:bg-gray-50 transition-colors">
+                        <input
+                          type="checkbox"
+                          checked={pm.enabled}
+                          onChange={(e) => updatePaymentMethod(pm.id, 'enabled', e.target.checked)}
+                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm text-gray-700">Activo</span>
+                      </label>
+                      <Button
+                        type="button"
+                        size="icon"
+                        onClick={() => removePaymentMethod(pm.id)}
+                        className="bg-transparent hover:bg-red-50 text-red-600 hover:text-red-700 border-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-        {paymentMethods.length === 0 ? (
-          <div style={{
-            padding: '2rem',
-            textAlign: 'center',
-            background: '#f8f9fa',
-            borderRadius: '8px',
-            color: '#666',
-            fontSize: '0.875rem'
-          }}>
-            No hay métodos de pago agregados
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {paymentMethods.map((pm) => (
-              <div key={pm.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                padding: '1rem',
-                background: '#f8f9fa',
-                borderRadius: '8px',
-                border: '1px solid #e1e3e5'
-              }}>
-                <input
-                  type="text"
-                  value={pm.name}
-                  onChange={(e) => updatePaymentMethod(pm.id, 'name', e.target.value)}
-                  placeholder="Nombre del método de pago"
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid #ddd',
-                    fontSize: '1rem'
-                  }}
-                />
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={pm.enabled}
-                    onChange={(e) => updatePaymentMethod(pm.id, 'enabled', e.target.checked)}
-                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                  />
-                  <span style={{ color: '#666', fontSize: '0.875rem' }}>Activo</span>
-                </label>
-                <button
-                  type="button"
-                  onClick={() => removePaymentMethod(pm.id)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#dc3545',
-                    cursor: 'pointer',
-                    padding: '0.5rem',
-                    fontSize: '1.2rem'
-                  }}
-                >
-                  🗑️
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={addPaymentMethod}
-            style={{
-              marginTop: '1rem',
-              padding: '0.75rem 1.5rem',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginLeft: 'auto'
-            }}
-        >
-          ➕ Agregar
-        </button>
-      </div>
+          <Button
+            type="button"
+            onClick={addPaymentMethod}
+            className="w-full sm:w-auto ml-auto bg-gray-100 hover:bg-gray-200 text-gray-900"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Método de Pago
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Políticas de la empresa */}
-      <div style={{
-        background: '#fff',
-        borderRadius: '12px',
-        padding: '2rem',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        border: '1px solid #e1e3e5'
-      }}>
-        <h2 style={{ fontSize: '1rem', marginTop: 0, marginBottom: '1rem', color: '#333', fontWeight: '600' }}>
-          📜 Políticas de la empresa
-          <span style={{ color: '#999', fontSize: '0.75rem', marginLeft: '0.5rem' }}>ℹ️</span>
-        </h2>
-        <textarea
-          value={companyPolicies}
-          onChange={(e) => setCompanyPolicies(e.target.value)}
-          placeholder="politicas de la empresa"
-          rows={6}
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            borderRadius: '8px',
-            border: '1px solid #ddd',
-            fontSize: '1rem',
-            fontFamily: 'inherit',
-            resize: 'vertical'
-          }}
-        />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <FileText className="h-5 w-5" />
+            Políticas de la Empresa
+            <Info className="h-4 w-4 text-gray-400" />
+          </CardTitle>
+          <CardDescription>
+            Define las políticas de tu empresa (devoluciones, garantías, términos, etc.)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={companyPolicies}
+            onChange={(e) => setCompanyPolicies(e.target.value)}
+            placeholder="Escribe las políticas de tu empresa..."
+            rows={6}
+            className="w-full resize-y"
+          />
+        </CardContent>
+      </Card>
 
       {/* Preguntas Frecuentes */}
-      <div style={{
-        background: '#fff',
-        borderRadius: '12px',
-        padding: '2rem',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        border: '1px solid #e1e3e5'
-      }}>
-        <h2 style={{ fontSize: '1rem', marginTop: 0, marginBottom: '1rem', color: '#333', fontWeight: '600' }}>
-          ❓ Preguntas Frecuentes
-        </h2>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <HelpCircle className="h-5 w-5" />
+            Preguntas Frecuentes
+          </CardTitle>
+          <CardDescription>
+            Agrega preguntas frecuentes y sus respuestas para el asistente IA
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {faq.length === 0 ? (
+            <div className="py-8 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <HelpCircle className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-sm text-gray-600">No hay preguntas frecuentes agregadas</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {faq.map((item, index) => (
+                <Card key={item.id} className="border-gray-200">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <Badge variant="outline" className="text-xs">
+                        Pregunta #{index + 1}
+                      </Badge>
+                      <Button
+                        type="button"
+                        size="icon"
+                        onClick={() => removeFAQ(item.id)}
+                        className="bg-transparent hover:bg-red-50 text-red-600 hover:text-red-700 border-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-600">Pregunta</label>
+                        <Input
+                          type="text"
+                          value={item.question}
+                          onChange={(e) => updateFAQ(item.id, 'question', e.target.value)}
+                          placeholder="Escribe la pregunta..."
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-600">Respuesta</label>
+                        <Textarea
+                          value={item.answer}
+                          onChange={(e) => updateFAQ(item.id, 'answer', e.target.value)}
+                          placeholder="Escribe la respuesta..."
+                          rows={2}
+                          className="w-full resize-y"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-        {faq.length === 0 ? (
-          <div style={{
-            padding: '2rem',
-            textAlign: 'center',
-            background: '#f8f9fa',
-            borderRadius: '8px',
-            color: '#666',
-            fontSize: '0.9375rem'
-          }}>
-            No hay preguntas frecuentes agregadas
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {faq.map((item, index) => (
-              <div key={item.id} style={{
-                padding: '1.5rem',
-                background: '#f8f9fa',
-                borderRadius: '8px',
-                border: '1px solid #e1e3e5'
-              }}>
-                <div                 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#333', fontSize: '0.875rem' }}>
-                  Pregunta #{index + 1}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <input
-                    type="text"
-                    value={item.question}
-                    onChange={(e) => updateFAQ(item.id, 'question', e.target.value)}
-                    placeholder="pregunta respuesta"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      borderRadius: '8px',
-                      border: '1px solid #ddd',
-                      fontSize: '0.9375rem'
-                    }}
-                  />
-                  <input
-                    type="text"
-                    value={item.answer}
-                    onChange={(e) => updateFAQ(item.id, 'answer', e.target.value)}
-                    placeholder="respuesta"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      borderRadius: '8px',
-                      border: '1px solid #ddd',
-                      fontSize: '0.9375rem'
-                    }}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removeFAQ(item.id)}
-                  style={{
-                    marginTop: '0.5rem',
-                    background: 'none',
-                    border: 'none',
-                    color: '#dc3545',
-                    cursor: 'pointer',
-                    padding: '0.5rem',
-                    fontSize: '1.2rem'
-                  }}
-                >
-                  🗑️
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={addFAQ}
-            style={{
-              marginTop: '1rem',
-              padding: '0.75rem 1.5rem',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginLeft: 'auto'
-            }}
-        >
-          ➕ Agregar
-        </button>
-      </div>
+          <Button
+            type="button"
+            onClick={addFAQ}
+            className="w-full sm:w-auto ml-auto bg-gray-100 hover:bg-gray-200 text-gray-900"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Pregunta Frecuente
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Preguntas Frecuentes Post Venta */}
-      <div style={{
-        background: '#fff',
-        borderRadius: '12px',
-        padding: '2rem',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        border: '1px solid #e1e3e5'
-      }}>
-        <h2 style={{ fontSize: '1rem', marginTop: 0, marginBottom: '1rem', color: '#333', fontWeight: '600' }}>
-          🛍️ Preguntas Frecuentes Post Venta
-        </h2>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <ShoppingBag className="h-5 w-5" />
+            Preguntas Frecuentes Post Venta
+          </CardTitle>
+          <CardDescription>
+            Agrega preguntas frecuentes relacionadas con el servicio post venta
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {postSaleFaq.length === 0 ? (
+            <div className="py-8 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <ShoppingBag className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-sm text-gray-600">No hay preguntas post venta agregadas</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {postSaleFaq.map((item, index) => (
+                <Card key={item.id} className="border-gray-200">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <Badge variant="outline" className="text-xs">
+                        Pregunta Post Venta #{index + 1}
+                      </Badge>
+                      <Button
+                        type="button"
+                        size="icon"
+                        onClick={() => removePostSaleFAQ(item.id)}
+                        className="bg-transparent hover:bg-red-50 text-red-600 hover:text-red-700 border-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-600">Pregunta</label>
+                        <Input
+                          type="text"
+                          value={item.question}
+                          onChange={(e) => updatePostSaleFAQ(item.id, 'question', e.target.value)}
+                          placeholder="Escribe la pregunta post venta..."
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-medium text-gray-600">Respuesta</label>
+                        <Textarea
+                          value={item.answer}
+                          onChange={(e) => updatePostSaleFAQ(item.id, 'answer', e.target.value)}
+                          placeholder="Escribe la respuesta post venta..."
+                          rows={2}
+                          className="w-full resize-y"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-        {postSaleFaq.length === 0 ? (
-          <div style={{
-            padding: '2rem',
-            textAlign: 'center',
-            background: '#f8f9fa',
-            borderRadius: '8px',
-            color: '#666',
-            fontSize: '0.9375rem'
-          }}>
-            No hay preguntas post venta agregadas
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {postSaleFaq.map((item, index) => (
-              <div key={item.id} style={{
-                padding: '1.5rem',
-                background: '#f8f9fa',
-                borderRadius: '8px',
-                border: '1px solid #e1e3e5'
-              }}>
-                <div                 style={{ fontWeight: '600', marginBottom: '0.75rem', color: '#333', fontSize: '0.875rem' }}>
-                  Pregunta #{index + 1}
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <input
-                    type="text"
-                    value={item.question}
-                    onChange={(e) => updatePostSaleFAQ(item.id, 'question', e.target.value)}
-                    placeholder="pregunta post venta"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      borderRadius: '8px',
-                      border: '1px solid #ddd',
-                      fontSize: '0.9375rem'
-                    }}
-                  />
-                  <input
-                    type="text"
-                    value={item.answer}
-                    onChange={(e) => updatePostSaleFAQ(item.id, 'answer', e.target.value)}
-                    placeholder="respuesta post venta"
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      borderRadius: '8px',
-                      border: '1px solid #ddd',
-                      fontSize: '0.9375rem'
-                    }}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removePostSaleFAQ(item.id)}
-                  style={{
-                    marginTop: '0.5rem',
-                    background: 'none',
-                    border: 'none',
-                    color: '#dc3545',
-                    cursor: 'pointer',
-                    padding: '0.5rem',
-                    fontSize: '1.2rem'
-                  }}
-                >
-                  🗑️
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={addPostSaleFAQ}
-            style={{
-              marginTop: '1rem',
-              padding: '0.75rem 1.5rem',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginLeft: 'auto'
-            }}
-        >
-          ➕ Agregar
-        </button>
-      </div>
+          <Button
+            type="button"
+            onClick={addPostSaleFAQ}
+            className="w-full sm:w-auto ml-auto bg-gray-100 hover:bg-gray-200 text-gray-900"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Pregunta Post Venta
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Reglas */}
-      <div style={{
-        background: '#fff',
-        borderRadius: '12px',
-        padding: '2rem',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        border: '1px solid #e1e3e5'
-      }}>
-        <h2 style={{ fontSize: '1rem', marginTop: 0, marginBottom: '1rem', color: '#333', fontWeight: '600' }}>
-          📋 Reglas
-        </h2>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <List className="h-5 w-5" />
+            Reglas
+          </CardTitle>
+          <CardDescription>
+            Define reglas específicas que el asistente IA debe seguir
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {rules.length === 0 ? (
+            <div className="py-8 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <List className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-sm text-gray-600">No hay reglas agregadas</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {rules.map((rule, index) => (
+                <Card key={rule.id} className="border-gray-200">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <Badge variant="secondary" className="min-w-[80px] text-xs">
+                        Regla #{index + 1}
+                      </Badge>
+                      <Input
+                        type="text"
+                        value={rule.text}
+                        onChange={(e) => updateRule(rule.id, e.target.value)}
+                        placeholder="Escribe la regla..."
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        onClick={() => removeRule(rule.id)}
+                        className="bg-transparent hover:bg-red-50 text-red-600 hover:text-red-700 border-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-        {rules.length === 0 ? (
-          <div style={{
-            padding: '2rem',
-            textAlign: 'center',
-            background: '#f8f9fa',
-            borderRadius: '8px',
-            color: '#666',
-            fontSize: '0.9375rem'
-          }}>
-            No hay reglas agregadas
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {rules.map((rule, index) => (
-              <div key={rule.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                padding: '1rem',
-                background: '#f8f9fa',
-                borderRadius: '8px',
-                border: '1px solid #e1e3e5'
-              }}>
-                <div                 style={{ fontWeight: '600', color: '#333', minWidth: '80px', fontSize: '0.875rem' }}>
-                  Regla #{index + 1}
-                </div>
-                <input
-                  type="text"
-                  value={rule.text}
-                  onChange={(e) => updateRule(rule.id, e.target.value)}
-                  placeholder="reglas"
-                  style={{
-                    flex: 1,
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '1px solid #ddd',
-                    fontSize: '1rem'
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => removeRule(rule.id)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#dc3545',
-                    cursor: 'pointer',
-                    padding: '0.5rem',
-                    fontSize: '1.2rem'
-                  }}
-                >
-                  🗑️
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={addRule}
-            style={{
-              marginTop: '1rem',
-              padding: '0.75rem 1.5rem',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginLeft: 'auto'
-            }}
-        >
-          ➕ Agregar
-        </button>
-      </div>
+          <Button
+            type="button"
+            onClick={addRule}
+            className="w-full sm:w-auto ml-auto bg-gray-100 hover:bg-gray-200 text-gray-900"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Regla
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Notificaciones */}
-      <div style={{
-        background: '#fff',
-        borderRadius: '12px',
-        padding: '2rem',
-        marginBottom: '2rem',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        border: '1px solid #e1e3e5'
-      }}>
-        <h2 style={{ fontSize: '1rem', marginTop: 0, marginBottom: '1rem', color: '#333', fontWeight: '600' }}>
-          🔔 Notificaciones
-          <span style={{ color: '#999', fontSize: '0.75rem', marginLeft: '0.5rem' }}>ℹ️</span>
-        </h2>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Bell className="h-5 w-5" />
+            Notificaciones
+            <Info className="h-4 w-4 text-gray-400" />
+          </CardTitle>
+          <CardDescription>
+            Configura números de teléfono para recibir notificaciones por tipo de evento
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {notifications.length === 0 ? (
+            <div className="py-6 text-center bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <Bell className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+              <p className="text-sm text-gray-600">No hay notificaciones agregadas</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {notifications.map((notification) => (
+                <Card key={notification.id} className="border-gray-200">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900 text-sm mb-1">
+                          {notification.type || 'Sin tipo'}
+                        </div>
+                        <div className="text-xs text-gray-600 flex items-center gap-2">
+                          <span>{notification.name || 'Sin nombre'}</span>
+                          <span>•</span>
+                          <span>{notification.phone || 'Sin número'}</span>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => openNotificationModal(notification.id)}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-900"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Editar
+                      </Button>
+                      <Button
+                        type="button"
+                        size="icon"
+                        onClick={() => removeNotification(notification.id)}
+                        className="bg-transparent hover:bg-red-50 text-red-600 hover:text-red-700 border-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
-        {notifications.length === 0 ? (
-          <div style={{
-            padding: '1rem',
-            background: '#f8f9fa',
-            borderRadius: '8px',
-            color: '#666',
-            marginBottom: '1rem',
-            fontSize: '0.875rem'
-          }}>
-            No hay notificaciones agregadas
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1rem' }}>
-            {notifications.map((notification) => (
-              <div key={notification.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                padding: '1rem',
-                background: '#f8f9fa',
-                borderRadius: '8px',
-                border: '1px solid #e1e3e5'
-              }}>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <div style={{ fontWeight: '600', color: '#333', fontSize: '0.875rem' }}>
-                    {notification.type || 'Sin tipo'}
-                  </div>
-                  <div style={{ color: '#666', fontSize: '0.8125rem' }}>
-                    {notification.name || 'Sin nombre'} • {notification.phone || 'Sin número'}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => openNotificationModal(notification.id)}
-                  style={{
-                    background: 'none',
-                    border: '1px solid #667eea',
-                    color: '#667eea',
-                    cursor: 'pointer',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '6px',
-                    fontSize: '0.875rem',
-                    fontWeight: '500'
-                  }}
-                >
-                  ✏️ Editar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => removeNotification(notification.id)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#dc3545',
-                    cursor: 'pointer',
-                    padding: '0.5rem',
-                    fontSize: '1.2rem'
-                  }}
-                >
-                  🗑️
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button
-          type="button"
-          onClick={() => openNotificationModal()}
-          style={{
-            padding: '0.75rem 1.5rem',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '0.9375rem',
-            fontWeight: '600',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            marginLeft: 'auto'
-          }}
-        >
-          ➕ Agregar
-        </button>
-      </div>
+          <Button
+            type="button"
+            onClick={() => openNotificationModal()}
+            className="w-full sm:w-auto ml-auto bg-gray-100 hover:bg-gray-200 text-gray-900"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Agregar Notificación
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Modal de Notificaciones */}
-      {notificationModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '2rem'
-        }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) {
-            closeNotificationModal();
-          }
-        }}
-        >
-          <div style={{
-            background: '#fff',
-            borderRadius: '16px',
-            padding: '2rem',
-            width: '100%',
-            maxWidth: '500px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-            position: 'relative'
-          }}
-          onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header del Modal */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '2rem',
-              paddingBottom: '1rem',
-              borderBottom: '1px solid #e1e3e5'
-            }}>
-              <h2 style={{
-                fontSize: '1.125rem',
-                margin: 0,
-                color: '#333',
-                fontWeight: '600'
-              }}>
-                🔔 Agregar Notificación
-              </h2>
-              <button
-                type="button"
-                onClick={closeNotificationModal}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1.5rem',
-                  color: '#666',
-                  cursor: 'pointer',
-                  padding: '0.5rem',
-                  lineHeight: 1,
-                  width: '32px',
-                  height: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: '4px',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
-              >
-                ✕
-              </button>
-            </div>
+      <Dialog open={notificationModalOpen} onOpenChange={(open) => {
+        if (!open) closeNotificationModal();
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              {editingNotificationId ? 'Editar Notificación' : 'Agregar Notificación'}
+            </DialogTitle>
+            <DialogDescription>
+              Configura los datos de contacto para recibir notificaciones
+            </DialogDescription>
+          </DialogHeader>
 
-            {/* Formulario del Modal */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {/* Tipo de Notificación */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500',
-                  color: '#333',
-                  fontSize: '0.875rem'
-                }}>
-                  Tipo de notificación
-                  <span style={{ color: '#999', fontSize: '0.75rem', marginLeft: '0.5rem' }}>ℹ️</span>
-                </label>
-                <select
-                  value={notificationType}
-                  onChange={(e) => setNotificationType(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '2px solid #e1e3e5',
-                    fontSize: '0.875rem',
-                    fontFamily: 'inherit',
-                    background: '#fff',
-                    cursor: 'pointer',
-                    transition: 'border-color 0.2s'
-                  }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = '#667eea'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = '#e1e3e5'}
-                >
-                  <option value="">Selecciona una opción</option>
+          <div className="space-y-4 py-4">
+            {/* Tipo de Notificación */}
+            <div className="space-y-2">
+              <label htmlFor="notificationType" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Tipo de notificación
+                <Info className="h-3 w-3 text-gray-400" />
+              </label>
+              <Select
+                value={notificationType}
+                onValueChange={setNotificationType}
+              >
+                <SelectTrigger id="notificationType">
+                  <SelectValue placeholder="Selecciona una opción" />
+                </SelectTrigger>
+                <SelectContent>
                   {(() => {
                     const configuredTypes = getConfiguredNotificationTypes();
                     return notificationTypes.map((type) => {
                       const isDisabled = configuredTypes.includes(type);
                       return (
-                        <option 
+                        <SelectItem 
                           key={type} 
                           value={type}
                           disabled={isDisabled}
-                          style={{
-                            backgroundColor: isDisabled ? '#f8f9fa' : '#fff',
-                            color: isDisabled ? '#999' : '#333'
-                          }}
+                          className={isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
                         >
-                          {type} {isDisabled ? '✓ (Ya configurado)' : ''}
-                        </option>
+                          {type} {isDisabled && <span className="ml-2 text-xs">(Ya configurado)</span>}
+                        </SelectItem>
                       );
                     });
                   })()}
-                </select>
-                {getConfiguredNotificationTypes().length > 0 && !editingNotificationId && (
-                  <div style={{
-                    marginTop: '0.5rem',
-                    padding: '0.75rem',
-                    background: '#fff3cd',
-                    border: '1px solid #ffc107',
-                    borderRadius: '6px',
-                    fontSize: '0.8125rem',
-                    color: '#856404'
-                  }}>
-                    ℹ️ Los tipos de notificación ya configurados aparecen bloqueados. Solo puedes configurar un número por tipo.
-                  </div>
-                )}
-              </div>
+                </SelectContent>
+              </Select>
+              {getConfiguredNotificationTypes().length > 0 && !editingNotificationId && (
+                <Card className="border-amber-200 bg-amber-50">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-2 text-amber-800">
+                      <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs">
+                        Los tipos de notificación ya configurados aparecen bloqueados. Solo puedes configurar un número por tipo.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
 
-              {/* Número de Teléfono con selector de país */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500',
-                  color: '#333',
-                  fontSize: '0.875rem'
-                }}>
-                  Número
-                  <span style={{ color: '#999', fontSize: '0.75rem', marginLeft: '0.5rem' }}>ℹ️</span>
-                </label>
-                <div style={{
-                  '--PhoneInput-color--focus': '#667eea',
-                  '--PhoneInputCountryIcon-opacity': '1',
-                  '--PhoneInputCountrySelect-marginRight': '0',
-                } as React.CSSProperties}>
-                  <style>{`
-                    .PhoneInput {
-                      width: 100%;
-                      border: 2px solid #e1e3e5;
-                      border-radius: 8px;
-                      transition: border-color 0.2s;
-                    }
-                    .PhoneInput:focus-within {
-                      border-color: #667eea;
-                    }
-                    .PhoneInputInput {
-                      padding: 0.75rem;
-                      border: none;
-                      outline: none;
-                      font-size: 0.875rem;
-                      font-family: inherit;
-                      background: transparent;
-                    }
-                    .PhoneInputCountryIcon {
-                      width: 1.5rem;
-                      height: 1.5rem;
-                      border-radius: 4px;
-                    }
-                    .PhoneInputCountrySelect {
-                      padding: 0.75rem;
-                      border-right: 1px solid #e1e3e5;
-                      background: transparent;
-                      border: none;
-                      cursor: pointer;
-                    }
-                    .PhoneInputCountrySelectArrow {
-                      opacity: 0.5;
-                      margin-left: 0.5rem;
-                    }
-                  `}</style>
-                  <PhoneInput
-                    international
-                    defaultCountry="CO"
-                    value={notificationPhone}
-                    onChange={(value) => setNotificationPhone(value || "")}
-                    countries={availableCountries}
-                    placeholder="Ingrese el número de teléfono"
-                    className="PhoneInput"
-                    numberInputProps={{
-                      className: "PhoneInputInput"
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Nombre */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  marginBottom: '0.5rem',
-                  fontWeight: '500',
-                  color: '#333',
-                  fontSize: '0.875rem'
-                }}>
-                  Nombre
-                  <span style={{ color: '#999', fontSize: '0.75rem', marginLeft: '0.5rem' }}>ℹ️</span>
-                </label>
-                <input
-                  type="text"
-                  value={notificationName}
-                  onChange={(e) => setNotificationName(e.target.value)}
-                  placeholder="Ingrese el nombre del recipiente"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '8px',
-                    border: '2px solid #e1e3e5',
-                    fontSize: '0.875rem',
-                    fontFamily: 'inherit',
-                    transition: 'border-color 0.2s'
+            {/* Número de Teléfono con selector de país */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Número de Teléfono
+                <Info className="h-3 w-3 text-gray-400" />
+              </label>
+              <div className="[--PhoneInput-color--focus:#667eea] [--PhoneInputCountryIcon-opacity:1] [--PhoneInputCountrySelect-marginRight:0]">
+                <style>{`
+                  .PhoneInput {
+                    width: 100%;
+                    border: 2px solid #e1e3e5;
+                    border-radius: 0.5rem;
+                    transition: border-color 0.2s;
+                  }
+                  .PhoneInput:focus-within {
+                    border-color: #667eea;
+                  }
+                  .PhoneInputInput {
+                    padding: 0.75rem;
+                    border: none;
+                    outline: none;
+                    font-size: 0.875rem;
+                    font-family: inherit;
+                    background: transparent;
+                  }
+                  .PhoneInputCountryIcon {
+                    width: 1.5rem;
+                    height: 1.5rem;
+                    border-radius: 0.25rem;
+                  }
+                  .PhoneInputCountrySelect {
+                    padding: 0.75rem;
+                    border-right: 1px solid #e1e3e5;
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                  }
+                  .PhoneInputCountrySelectArrow {
+                    opacity: 0.5;
+                    margin-left: 0.5rem;
+                  }
+                `}</style>
+                <PhoneInput
+                  international
+                  defaultCountry="CO"
+                  value={notificationPhone}
+                  onChange={(value) => setNotificationPhone(value || "")}
+                  countries={availableCountries}
+                  placeholder="Ingrese el número de teléfono"
+                  className="PhoneInput"
+                  numberInputProps={{
+                    className: "PhoneInputInput"
                   }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = '#667eea'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = '#e1e3e5'}
                 />
               </div>
             </div>
 
-            {/* Botones del Modal */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '1rem',
-              marginTop: '2rem',
-              paddingTop: '1.5rem',
-              borderTop: '1px solid #e1e3e5'
-            }}>
-              <button
-                type="button"
-                onClick={closeNotificationModal}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: '#f8f9fa',
-                  color: '#666',
-                  border: '1px solid #e1e3e5',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#e9ecef'}
-                onMouseLeave={(e) => e.currentTarget.style.background = '#f8f9fa'}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={saveNotification}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  boxShadow: '0 2px 8px rgba(102, 126, 234, 0.3)',
-                  transition: 'transform 0.2s, box-shadow 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(102, 126, 234, 0.3)';
-                }}
-              >
-                ✓ Aplicar
-              </button>
+            {/* Nombre */}
+            <div className="space-y-2">
+              <label htmlFor="notificationName" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Nombre del Recipiente
+                <Info className="h-3 w-3 text-gray-400" />
+              </label>
+              <Input
+                id="notificationName"
+                type="text"
+                value={notificationName}
+                onChange={(e) => setNotificationName(e.target.value)}
+                placeholder="Ingrese el nombre del recipiente"
+                className="w-full"
+              />
             </div>
           </div>
-        </div>
-      )}
+
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={closeNotificationModal}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-900"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={saveNotification}
+              className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900"
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Aplicar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Botón Actualizar Información / Guardar */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingTop: '2rem',
-        borderTop: '1px solid #e1e3e5',
-        marginTop: '2rem'
-      }}>
-        {hasUnsavedChanges && (
-          <div style={{
-            padding: '0.75rem 1rem',
-            background: '#fff3cd',
-            border: '1px solid #ffc107',
-            borderRadius: '6px',
-            fontSize: '0.875rem',
-            color: '#856404',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}>
-            <span>⚠️</span>
-            <span>Tienes cambios sin guardar</span>
+      <Card className="border-t-2">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            {hasUnsavedChanges ? (
+              <Card className="border-amber-200 bg-amber-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-2 text-amber-800">
+                    <AlertCircle className="h-5 w-5" />
+                    <span className="text-sm font-medium">Tienes cambios sin guardar</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="text-sm text-gray-500">No hay cambios pendientes</div>
+            )}
+            <Button
+              type="submit"
+              disabled={aiFetcher.state === "submitting" || !hasUnsavedChanges}
+              className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {aiFetcher.state === "submitting" ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Guardando...
+                </>
+              ) : hasUnsavedChanges ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Actualizar Información
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Guardar
+                </>
+              )}
+            </Button>
           </div>
-        )}
-        {!hasUnsavedChanges && <div />}
-        <button
-          type="submit"
-          disabled={aiFetcher.state === "submitting" || !hasUnsavedChanges}
-          style={{
-            padding: '1rem 2rem',
-            background: aiFetcher.state === "submitting" || !hasUnsavedChanges
-              ? '#ccc' 
-              : 'linear-gradient(135deg, rgb(0, 32, 238) 0%, rgb(75, 81, 162) 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '0.9375rem',
-            fontWeight: '600',
-            cursor: aiFetcher.state === "submitting" || !hasUnsavedChanges ? 'not-allowed' : 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            boxShadow: aiFetcher.state === "submitting" || !hasUnsavedChanges
-              ? 'none' 
-              : '0 4px 12px rgba(0, 32, 238, 0.4)',
-            opacity: aiFetcher.state === "submitting" || !hasUnsavedChanges ? 0.7 : 1,
-            transition: 'all 0.2s'
-          }}
-        >
-          {aiFetcher.state === "submitting" 
-            ? "💾 Guardando..." 
-            : hasUnsavedChanges 
-              ? "🔄 Actualizar Información" 
-              : "💾 Guardar"}
-        </button>
-      </div>
+        </CardContent>
+      </Card>
     </form>
   );
 }
