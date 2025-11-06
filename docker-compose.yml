@@ -17,6 +17,7 @@ services:
       TZ: America/Bogota
     
     command:
+      - mysqld
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --default-authentication-plugin=mysql_native_password
@@ -106,7 +107,6 @@ services:
         condition: on-failure
         delay: 15s
         max_attempts: 5
-        window: 180s
       
       labels:
         - traefik.enable=true
