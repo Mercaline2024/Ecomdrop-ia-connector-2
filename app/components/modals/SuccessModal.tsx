@@ -37,17 +37,17 @@ export function SuccessModal({
               <CheckCircle2 className="h-6 w-6 text-green-600" />
             </div>
           </div>
-          <DialogTitle className="text-xl font-semibold text-gray-900">
+          <DialogTitle className="text-2xl font-bold text-gray-900">
             {title}
           </DialogTitle>
           <DialogDescription className="text-base text-gray-600 mt-2">
             {description}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="sm:justify-center">
+        <DialogFooter className="sm:justify-center mt-6">
           <Button
             onClick={onClose}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-8"
+            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-2 rounded-md font-medium"
           >
             {buttonText}
           </Button>

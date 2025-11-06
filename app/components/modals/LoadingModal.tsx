@@ -20,7 +20,12 @@ export function LoadingModal({
 }: LoadingModalProps) {
   return (
     <Dialog open={open}>
-      <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+      <DialogContent 
+        className="sm:max-w-md" 
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="rounded-full bg-blue-100 p-3">
