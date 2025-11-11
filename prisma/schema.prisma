@@ -5,8 +5,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// MySQL Database Configuration
-// Connected to MySQL 8.0 on VPS (31.97.135.241:3306)
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
